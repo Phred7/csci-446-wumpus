@@ -5,13 +5,7 @@ from board import *
 class Player:
     def __init__(self):
         self.b = Board()
-        wumpusCoords = [[1, 0], [3, 3]]
-        for coord in wumpusCoords:
-            self.b.insert_wumpus(coord)
-
-        self.b.grid[4][4][CellValue.GOLD] = True
-        self.b.grid[2][2][CellValue.PIT] = True
-
+        self.b.generate_board()
         self.e = Explorer(self.b)
 
     def prompt(self) -> bool:
@@ -19,12 +13,15 @@ class Player:
         self.e.observe()
         print("Enter an action. Enter 'h' to view all actions.")
         result = input().lower()
+
         if result == 'h':
             print("w: walk")
             print("l: turn left")
             print('r: turn right')
             print('s: shoot arrow')
+            print('d: display board')
             print('q: exit program')
+            print('You have', self.e.arrowCount, 'arrows.')
         elif result == "w":
             self.e.walk()
             if self.e.isDead:
@@ -37,6 +34,8 @@ class Player:
             self.e.turn(Direction.RIGHT)
         elif result == 's':
             self.e.shoot()
+        elif result == 'd':
+            self.e.disp()
         elif result == 'q':
             return False
         else:
@@ -48,6 +47,9 @@ class Player:
 
 def main():
     p: Player = Player()
+    #p.b.disp()
     while p.prompt():
         continue
+    print(p.e.actionsTaken)
+    p.b.disp()
 main()

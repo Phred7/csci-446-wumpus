@@ -138,6 +138,26 @@ class Explorer:
         self.hasGold = True
         return
 
+    def disp(self):
+        rows = []
+        for i in range(self.board.size):
+            string = "|"
+            for j in range(self.board.size):
+                if i == self.location[0] and j == self.location[1]:
+                    if self.facing == Facing.NORTH:
+                        string += "^|"
+                    elif self.facing == Facing.EAST:
+                        string += ">|"
+                    elif self.facing == Facing.SOUTH:
+                        string += "v|"
+                    elif self.facing == Facing.WEST:
+                        string += "<|"
+                else:
+                    string += "_|"
+            rows.append(string)
+        rows.reverse()
+        for row in rows:
+            print(row)
 
     @abstractmethod
     def act(self) -> bool:

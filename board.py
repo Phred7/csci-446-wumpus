@@ -1,5 +1,6 @@
 from enum import IntEnum
-
+from random import randint
+from random import random
 import numpy as np
 
 
@@ -35,8 +36,28 @@ class Board:
     def get_bump(self, x: int, y: int) -> bool:
         pass
 
-    def generate_board(self) -> None:
-        pass
+    #TODO: guarantee safe path
+    def generate_board(self, wumpus_probability: float = 0.1, pit_probability: float = 0.1) -> None:
+        gold_x: int = 0
+        gold_y: int = 0
+
+        while gold_x == 0 and gold_y == 0:
+            gold_x = randint(0, self.size - 1)
+            gold_y = randint(0, self.size - 1)
+        self.grid[gold_x][gold_y][CellValue.GOLD] = True
+
+        for i in range(self.size):
+            for j in range(self.size):
+                if random() < wumpus_probability and not self.grid[i][j][CellValue.GOLD] and not (i == 0 and j == 0):
+                    self.grid[i][j][CellValue.WUMPUS] = True
+                    self.wumpus_count += 1
+
+        for i in range(self.size):
+            for j in range(self.size):
+                if random() < pit_probability and not self.grid[i][j][CellValue.WUMPUS] \
+                                              and not self.grid[i][j][CellValue.GOLD]\
+                                              and not (i == 0 and j == 0):
+                    self.grid[i][j][CellValue.PIT] = True
 
     def kill_wumpus(self, coords) -> None:
         pass
@@ -69,3 +90,22 @@ class Board:
             if self.grid[adj[0]][adj[1]][CellValue.GOLD]:
                 sensations[Sensation.GLIMMER] = True
         return sensations
+
+    #TODO: EITHER THIS OR
+    def disp(self):
+        rows = []
+        for i in range(self.size):
+            string = "|"
+            for j in range(self.size):
+                if self.grid[j][i][CellValue.GOLD]:
+                    string += "G|"
+                elif self.grid[j][i][CellValue.WUMPUS]:
+                    string += "W|"
+                elif self.grid[j][i][CellValue.PIT]:
+                    string += "P|"
+                else:
+                    string += "_|"
+            rows.append(string)
+        rows.reverse()
+        for row in rows:
+            print(row)
