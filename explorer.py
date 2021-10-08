@@ -129,6 +129,7 @@ class Explorer:
             print("A breeze ruffles your hair.")
         if sensations[Sensation.GLIMMER]:
             print("You see a glimmer in the darkness.")
+        return sensations
 
     def die(self):
         self.is_dead = True
@@ -143,7 +144,7 @@ class Explorer:
         for i in range(self.board.size):
             string = "|"
             for j in range(self.board.size):
-                if i == self.location[0] and j == self.location[1]:
+                if i == self.location[1] and j == self.location[0]:
                     if self.facing == Facing.NORTH:
                         string += "^|"
                     elif self.facing == Facing.EAST:
