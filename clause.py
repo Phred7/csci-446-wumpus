@@ -13,6 +13,7 @@ class Clause:
         self.operator: str = operator
         self.sentences: List[Sentence] = arguments
         self.string: str = ""
+        self.kb_id: int = -1
 
     def __str__(self) -> str:  # TODO anytime a clause is modified self.string MUST be set to ""
         """
@@ -27,3 +28,9 @@ class Clause:
                     string += f" {self.operator} "
             self.string = deepcopy(string)
         return self.string
+
+    def set_kb_id(self, id: int) -> None:
+        self.kb_id = id
+
+    def get_kb_id(self) -> int:
+        return self.kb_id
