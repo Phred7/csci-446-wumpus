@@ -1,26 +1,28 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Tuple
 
 from board import *
 
 
-class Direction(IntEnum):
-    LEFT: int = 0
-    RIGHT: int = 1
+class Direction(Enum):
+    LEFT = 0
+    RIGHT = 1
 
-class Facing(IntEnum):
-    NORTH: int = 0
-    EAST: int = 1
-    SOUTH: int = 2
-    WEST: int = 3
+
+class Facing(Enum):
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
 
 
 class Explorer:
 
     def __init__(self, board: Board):
         self.actions_taken: int = 0
-        self.facing: int = Facing.NORTH
-        self.location: [int, int] = [0, 0]
+        self.facing: Facing = Facing.NORTH
+        self.location: Tuple[int, int] = (0, 0)
         self.is_dead: bool = False
         self.board = board
         self.arrows = board.wumpus_count
@@ -50,7 +52,7 @@ class Explorer:
 
         return
 
-    #TODO: DOES NOT ACCOUNT FOR BUMPING OBSTACLE IN BOARD, ONLY EDGES
+    # TODO: DOES NOT ACCOUNT FOR BUMPING OBSTACLE IN BOARD, ONLY EDGES
     def walk(self) -> bool:
         self.actions_taken += 1
         hit_something: bool = False
@@ -100,16 +102,16 @@ class Explorer:
         y = self.location[1]
         targets = []
         if self.facing == Facing.NORTH:
-            for i in range(y+1, self.board.size, 1):
+            for i in range(y + 1, self.board.size, 1):
                 targets.append([x, i])
         elif self.facing == Facing.EAST:
-            for i in range(x+1, self.board.size, 1):
+            for i in range(x + 1, self.board.size, 1):
                 targets.append([i, y])
         elif self.facing == Facing.SOUTH:
-            for i in range(y-1, -1, -1):
+            for i in range(y - 1, -1, -1):
                 targets.append([x, i])
         elif self.facing == Facing.WEST:
-            for i in range(x-1, -1, -1):
+            for i in range(x - 1, -1, -1):
                 targets.append([i, y])
 
         print("Targets are", targets)
