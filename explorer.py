@@ -21,14 +21,14 @@ class Explorer:
         self.actionsTaken: int = 0
         self.facing: int = Facing.NORTH
         self.location: [int, int] = [0, 0]
-        self.isDead: bool = False
+        self.is_dead: bool = False
         self.board = board
-        self.arrowCount = board.wumpus_count
-        self.hasGold: bool = False
         self.displayMessages: bool = messages
+        self.arrows = board.wumpus_count
+        self.has_gold: bool = False
 
     def turn(self, direction: Direction) -> None:
-        self.actionsTaken += 1
+        self.actions_taken += 1
         if direction == Direction.RIGHT:
             if self.facing == Facing.NORTH:
                 self.facing = Facing.EAST
@@ -53,7 +53,7 @@ class Explorer:
 
     #TODO: DOES NOT ACCOUNT FOR BUMPING OBSTACLE IN BOARD, ONLY EDGES
     def walk(self) -> bool:
-        self.actionsTaken += 1
+        self.actions_taken += 1
         hit_something: bool = False
         if self.facing == Facing.NORTH:
             if self.location[1] == self.board.size - 1:
@@ -95,14 +95,13 @@ class Explorer:
         return False
 
     def shoot(self) -> bool:
-        if self.arrowCount == 0:
+        if self.arrows == 0:
             if self.displayMessages:
                 print("Your quiver is empty.")
             return False
         else:
-            self.arrowCount -= 1
             if self.displayMessages:
-                print("You have", self.arrowCount, "arrows left.")
+                print("You have", self.arrows, "arrows left.")
         x = self.location[0]
         y = self.location[1]
         targets = []
@@ -143,11 +142,11 @@ class Explorer:
         return sensations
 
     def die(self):
-        self.isDead = True
+        self.is_dead = True
         return
 
     def escape(self):
-        self.hasGold = True
+        self.has_gold = True
         return
 
     def disp(self):

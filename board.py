@@ -9,17 +9,20 @@ class CellValue(IntEnum):
     PIT: int = 1
     OBSTACLE: int = 2
     GOLD: int = 3
-    num_dimensions: int = 4  # this represents the number of bools in the third dim of the grid
+    DIM: int = 4  # this represents the number of bools in the third dim of the grid
+
 
 class Sensation(IntEnum):
     STENCH: int = 0
     BREEZE: int = 1
     GLIMMER: int = 2
 
+
 class Board:
 
     def __init__(self, size: int = 5, ):
-        self.grid = np.zeros([size, size, 4], dtype=bool) #TODO: WALKER I USED num_dimensions BUT THE TYPE WAS WRONG
+        self.grid = np.zeros([size, size, CellValue.DIM],
+                             dtype=bool)  # TODO: WALKER I USED num_dimensions BUT THE TYPE WAS WRONG
         self.size = size
         self.wumpus_count: int = 0
         pass
@@ -36,7 +39,7 @@ class Board:
     def get_bump(self, x: int, y: int) -> bool:
         pass
 
-    #TODO: guarantee safe path
+    # TODO: guarantee safe path
     def generate_board(self, wumpus_probability: float = 0.1, pit_probability: float = 0.1) -> None:
         gold_x: int = 0
         gold_y: int = 0
@@ -55,8 +58,8 @@ class Board:
         for i in range(self.size):
             for j in range(self.size):
                 if random() < pit_probability and not self.grid[i][j][CellValue.WUMPUS] \
-                                              and not self.grid[i][j][CellValue.GOLD]\
-                                              and not (i == 0 and j == 0):
+                        and not self.grid[i][j][CellValue.GOLD] \
+                        and not (i == 0 and j == 0):
                     self.grid[i][j][CellValue.PIT] = True
 
     def kill_wumpus(self, coords) -> None:
@@ -66,23 +69,23 @@ class Board:
         self.grid[coords[0]][coords[1]][CellValue.WUMPUS] = True
         self.wumpus_count += 1
 
-    #TODO: IDK HOW TO DO A RETURN SIGNATURE FOR AN ARRAY
+    # TODO: IDK HOW TO DO A RETURN SIGNATURE FOR AN ARRAY
     def get_observations(self, coords):
-        adjacentCells = []
+        adjacent_cells = []
         x = coords[0]
         y = coords[1]
 
         if x > 0:
-            adjacentCells.append([x - 1, y])
+            adjacent_cells.append([x - 1, y])
         if y > 0:
-            adjacentCells.append([x, y - 1])
+            adjacent_cells.append([x, y - 1])
         if x < self.size - 1:
-            adjacentCells.append([x + 1, y])
+            adjacent_cells.append([x + 1, y])
         if y < self.size - 1:
-            adjacentCells.append([x, y + 1])
+            adjacent_cells.append([x, y + 1])
 
         sensations = np.full(len(Sensation), False)
-        for adj in adjacentCells:
+        for adj in adjacent_cells:
             if self.grid[adj[0]][adj[1]][CellValue.WUMPUS]:
                 sensations[Sensation.STENCH] = True
             if self.grid[adj[0]][adj[1]][CellValue.PIT]:
@@ -91,7 +94,7 @@ class Board:
                 sensations[Sensation.GLIMMER] = True
         return sensations
 
-    #TODO: EITHER THIS OR
+    # TODO: EITHER THIS OR
     def disp(self):
         rows = []
         for i in range(self.size):
