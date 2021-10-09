@@ -19,12 +19,13 @@ class Facing(Enum):
 
 class Explorer:
 
-    def __init__(self, board: Board):
+    def __init__(self, board: Board, messages=True):
         self.actions_taken: int = 0
         self.facing: Facing = Facing.NORTH
         self.location: Tuple[int, int] = (0, 0)
         self.is_dead: bool = False
         self.board = board
+        self.display_messages: bool = messages
         self.arrows = board.wumpus_count
         self.has_gold: bool = False
 
@@ -77,15 +78,19 @@ class Explorer:
             else:
                 self.location[0] -= 1
         if hit_something:
-            print("You have bumped into something.")
+            if self.display_messages:
+                print("You have bumped into something.")
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.WUMPUS]:
-            print("You have been eaten by a wumpus.")
+            if self.display_messages:
+                print("You have been eaten by a wumpus.")
             self.die()
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.PIT]:
-            print("You have fallen into a pit.")
+            if self.display_messages:
+                print("You have fallen into a pit.")
             self.die()
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.GOLD]:
-            print("You have found gold!")
+            if self.display_messages:
+                print("You have found gold!")
             self.escape()
         else:
             return True
@@ -93,11 +98,12 @@ class Explorer:
 
     def shoot(self) -> bool:
         if self.arrows == 0:
-            print("Your quiver is empty.")
+            if self.display_messages:
+                print("Your quiver is empty.")
             return False
         else:
-            self.arrows -= 1
-            print("You have", self.arrows, "arrows left.")
+            if self.display_messages:
+                print("You have", self.arrows, "arrows left.")
         x = self.location[0]
         y = self.location[1]
         targets = []
@@ -114,23 +120,27 @@ class Explorer:
             for i in range(x - 1, -1, -1):
                 targets.append([i, y])
 
-        print("Targets are", targets)
+        if self.display_messages:
+            print("Targets are", targets)
         for target in targets:
             if self.board.grid[target[0]][target[1]][CellValue.WUMPUS]:
                 self.board.kill_wumpus(target)
-                print("A scream rings out through the darkness!")
+                if self.display_messages:
+                    print("A scream rings out through the darkness!")
                 return True
-        print("The arrow disappears into the darkness.")
+        if self.display_messages:
+            print("The arrow disappears into the darkness.")
         return False
 
     def observe(self):
         sensations = self.board.get_observations(self.location)
-        if sensations[Sensation.STENCH]:
-            print("A terrible stench fills your nostrils.")
-        if sensations[Sensation.BREEZE]:
-            print("A breeze ruffles your hair.")
-        if sensations[Sensation.GLIMMER]:
-            print("You see a glimmer in the darkness.")
+        if self.display_messages:
+            if sensations[Sensation.STENCH]:
+                print("A terrible stench fills your nostrils.")
+            if sensations[Sensation.BREEZE]:
+                print("A breeze ruffles your hair.")
+            if sensations[Sensation.GLIMMER]:
+                print("You see a glimmer in the darkness.")
         return sensations
 
     def die(self):
@@ -165,3 +175,8 @@ class Explorer:
     @abstractmethod
     def act(self) -> bool:
         raise NotImplementedError
+
+    #TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THRU SAFE THINGS IF POSSIBLE... Wouldn't this defeat the purpose of using a KB? I guess Im confused as to what this method would be doing
+    def path(self, coords):
+        self.location = coords
+        return
