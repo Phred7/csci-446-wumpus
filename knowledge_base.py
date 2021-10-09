@@ -23,6 +23,7 @@ class KnowledgeBase:
             raise IOError("Knowledge Base can only be initialized once. Call append() to add more clauses to this KB.")
         for rule in rules:
             rule.set_kb_id(self.clauses)
+            rule.set_rule()
             self.kb.append(rule)
             self.clauses += 1
         self.kb_init = True
@@ -35,11 +36,14 @@ class KnowledgeBase:
         self.kb.append(item)
         self.infer()
 
+    def get_clause(self, clause_kb_id: int) -> Clause:
+        return self.kb[clause_kb_id]
+
     def infer(self) -> None:
         pass
 
     def resolution(self) -> None:
         pass
 
-    def unify(self) -> None:
+    def unify(self) -> str:
         pass

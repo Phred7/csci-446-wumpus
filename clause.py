@@ -12,8 +12,10 @@ class Clause:
     def __init__(self, arguments: List[Sentence], *, operator: str = "|") -> None:
         self.operator: str = operator
         self.sentences: List[Sentence] = arguments
+        self.negated: bool = False
         self.string: str = ""
         self.kb_id: int = -1
+        self.rule: bool = False
 
     def __str__(self) -> str:  # TODO anytime a clause is modified self.string MUST be set to ""
         """
@@ -34,3 +36,6 @@ class Clause:
 
     def get_kb_id(self) -> int:
         return self.kb_id
+
+    def set_rule(self) -> None:
+        self.rule = True

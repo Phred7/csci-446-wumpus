@@ -5,12 +5,12 @@ from board import *
 from rational_explorer import *
 
 if __name__ == '__main__':
-    board: Board = Board(5)
+    # Example Rational:
+    board: Board = Board(size=5)
     board.generate_board()
     rational: RationalExplorer = RationalExplorer(board)
-    rational.init_knowledge_base()
     print(rational.knowledge_base)
-    print(rational.board)
+    print(f"{rational.board.__class__.__name__}:\n{rational.board}")
 
     # Example KB:
     # kb: KnowledgeBase = KnowledgeBase()
@@ -21,5 +21,3 @@ if __name__ == '__main__':
     # clause_2: Clause = Clause([sentence_3])
     # kb.set_rules([clause, clause_2])
     # print("\n\n" + str(kb))
-
-
