@@ -5,14 +5,12 @@ from sentence import *
 
 class Clause:
     """
-    Operators
-        Negation:       ~
-        Or:             |
+    Negation:       ~
+    Or:             |
     """
 
-    def __init__(self, arguments: List[Sentence], negated: bool = False, *, operator: str = "|") -> None:
+    def __init__(self, arguments: List[Sentence], *, operator: str = "|") -> None:
         self.operator: str = operator
-        self.negation: bool = negated
         self.sentences: List[Sentence] = arguments
         self.string: str = ""
 
@@ -21,7 +19,7 @@ class Clause:
         Implements memoization to decrease time taken to generate strings for Clauses.
         :return:
         """
-        if self.string != "":
+        if self.string == "":
             string: str = ""
             for arg in self.sentences:
                 string += f"{str(arg)}"

@@ -7,7 +7,6 @@ class KnowledgeBase:
     def __init__(self) -> None:
         self.kb: List[Clause] = []
         self.string: str = ""
-        pass
 
     def set_rules(self, rules: List[Clause]) -> None:
         for rule in rules:
