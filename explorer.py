@@ -17,7 +17,7 @@ class Facing(IntEnum):
 
 class Explorer:
 
-    def __init__(self, board: Board):
+    def __init__(self, board: Board, messages = True):
         self.actionsTaken: int = 0
         self.facing: int = Facing.NORTH
         self.location: [int, int] = [0, 0]
@@ -25,6 +25,7 @@ class Explorer:
         self.board = board
         self.arrowCount = board.wumpus_count
         self.hasGold: bool = False
+        self.displayMessages: bool = messages
 
     def turn(self, direction: Direction) -> None:
         self.actionsTaken += 1
@@ -75,15 +76,19 @@ class Explorer:
             else:
                 self.location[0] -= 1
         if hit_something:
-            print("You have bumped into something.")
+            if self.displayMessages:
+                print("You have bumped into something.")
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.WUMPUS]:
-            print("You have been eaten by a wumpus.")
+            if self.displayMessages:
+                print("You have been eaten by a wumpus.")
             self.die()
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.PIT]:
-            print("You have fallen into a pit.")
+            if self.displayMessages:
+                print("You have fallen into a pit.")
             self.die()
         elif self.board.grid[self.location[0]][self.location[1]][CellValue.GOLD]:
-            print("You have found gold!")
+            if self.displayMessages:
+                print("You have found gold!")
             self.escape()
         else:
             return True
@@ -91,11 +96,13 @@ class Explorer:
 
     def shoot(self) -> bool:
         if self.arrowCount == 0:
-            print("Your quiver is empty.")
+            if self.displayMessages:
+                print("Your quiver is empty.")
             return False
         else:
             self.arrowCount -= 1
-            print("You have", self.arrowCount, "arrows left.")
+            if self.displayMessages:
+                print("You have", self.arrowCount, "arrows left.")
         x = self.location[0]
         y = self.location[1]
         targets = []
@@ -112,23 +119,27 @@ class Explorer:
             for i in range(x-1, -1, -1):
                 targets.append([i, y])
 
-        print("Targets are", targets)
+        if self.displayMessages:
+            print("Targets are", targets)
         for target in targets:
             if self.board.grid[target[0]][target[1]][CellValue.WUMPUS]:
                 self.board.kill_wumpus(target)
-                print("A scream rings out through the darkness!")
+                if self.displayMessages:
+                    print("A scream rings out through the darkness!")
                 return True
-        print("The arrow disappears into the darkness.")
+        if self.displayMessages:
+            print("The arrow disappears into the darkness.")
         return False
 
     def observe(self):
         sensations = self.board.get_observations(self.location)
-        if sensations[Sensation.STENCH]:
-            print("A terrible stench fills your nostrils.")
-        if sensations[Sensation.BREEZE]:
-            print("A breeze ruffles your hair.")
-        if sensations[Sensation.GLIMMER]:
-            print("You see a glimmer in the darkness.")
+        if self.displayMessages:
+            if sensations[Sensation.STENCH]:
+                print("A terrible stench fills your nostrils.")
+            if sensations[Sensation.BREEZE]:
+                print("A breeze ruffles your hair.")
+            if sensations[Sensation.GLIMMER]:
+                print("You see a glimmer in the darkness.")
         return sensations
 
     def die(self):
@@ -163,3 +174,8 @@ class Explorer:
     @abstractmethod
     def act(self) -> bool:
         raise NotImplementedError
+
+    #TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THRU SAFE THINGS IF POSSIBLE
+    def path(self, coords):
+        self.location = coords
+        return
