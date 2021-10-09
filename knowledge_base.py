@@ -9,7 +9,7 @@ class KnowledgeBase:
         self.string: str = ""
         pass
 
-    def set_rules(self, rules: List[Clause]):
+    def set_rules(self, rules: List[Clause]) -> None:
         for rule in rules:
             self.kb.append(rule)
 

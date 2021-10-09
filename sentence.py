@@ -5,7 +5,7 @@ from typing import List
 class Sentence:
 
     def __init__(self, name: str, identifier: str, *, variables: List[str] = None, literals: List[int] = None,
-                 negation: bool = False):
+                 negation: bool = False) -> None:
         self.name: str = name
         self.identifier: str = identifier
         self.literals = List[int] if literals is None else literals

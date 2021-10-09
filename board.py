@@ -20,7 +20,7 @@ class Sensation(IntEnum):
 
 class Board:
 
-    def __init__(self, size: int = 5, ):
+    def __init__(self, size: int = 5, ) -> None:
         self.grid = np.zeros([size, size, CellValue.DIM],
                              dtype=bool)  # TODO: WALKER I USED num_dimensions BUT THE TYPE WAS WRONG
         self.size = size

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from enum import Enum
 from typing import Tuple
 
@@ -24,9 +25,9 @@ class Explorer:
         self.facing: Facing = Facing.NORTH
         self.location: Tuple[int, int] = (0, 0)
         self.is_dead: bool = False
-        self.board = board
+        self.board: Board = deepcopy(board)
         self.display_messages: bool = messages
-        self.arrows = board.wumpus_count
+        self.arrows: int = board.wumpus_count
         self.has_gold: bool = False
 
     def turn(self, direction: Direction) -> None:
@@ -143,11 +144,11 @@ class Explorer:
                 print("You see a glimmer in the darkness.")
         return sensations
 
-    def die(self):
+    def die(self) -> None:
         self.is_dead = True
         return
 
-    def escape(self):
+    def escape(self) -> None:
         self.has_gold = True
         return
 
@@ -176,7 +177,7 @@ class Explorer:
     def act(self) -> bool:
         raise NotImplementedError
 
-    #TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THRU SAFE THINGS IF POSSIBLE... Wouldn't this defeat the purpose of using a KB? I guess Im confused as to what this method would be doing
+    # TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THROUGH SAFE THINGS IF POSSIBLE... Wouldn't this defeat the purpose of using a KB? I guess Im confused as to what this method would be doing
     def path(self, coords):
         self.location = coords
         return

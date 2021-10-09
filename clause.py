@@ -10,7 +10,7 @@ class Clause:
         Or:             |
     """
 
-    def __init__(self, arguments: List[Sentence], negated: bool = False, *, operator: str = "|"):
+    def __init__(self, arguments: List[Sentence], negated: bool = False, *, operator: str = "|") -> None:
         self.operator: str = operator
         self.negation: bool = negated
         self.sentences: List[Sentence] = arguments
