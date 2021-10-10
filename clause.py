@@ -31,8 +31,11 @@ class Clause:
             self.string = deepcopy(string)
         return self.string
 
-    def set_kb_id(self, id: int) -> None:
-        self.kb_id = id
+    def __len__(self):
+        return self.sentences.__len__()
+
+    def set_kb_id(self, _id: int) -> None:
+        self.kb_id = _id
 
     def get_kb_id(self) -> int:
         return self.kb_id
