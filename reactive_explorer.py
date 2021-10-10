@@ -25,26 +25,18 @@ class ReactiveExplorer(Explorer):
         x = self.location[0]
         y = self.location[1]
 
-        if self.board.grid[x, y][CellValue.GOLD]:
+        if self.board.grid[x, y][CellContent.GOLD]:
             self.has_gold = True
             return
 
-        if self.age > 10000 or self.board.grid[x, y][CellValue.WUMPUS] or self.board.grid[x, y][CellValue.PIT]:
+        if self.age > 10000 or self.board.grid[x, y][CellContent.WUMPUS] or self.board.grid[x, y][CellContent.PIT]:
             self.die()
             return
         self.age += 1
 
         self.visit_map[x][y] = VisitState.VISITED
-        adjacent_cells = []
 
-        if x > 0:
-            adjacent_cells.append([x - 1, y])
-        if x < self.board.size - 1:
-            adjacent_cells.append([x + 1, y])
-        if y > 0:
-            adjacent_cells.append([x, y - 1])
-        if y < self.board.size - 1:
-            adjacent_cells.append([x, y + 1])
+        adjacent_cells = self.get_adjacent_cells()
 
         sensations = self.observe()
 

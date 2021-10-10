@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from typing import Tuple
+from typing import List
 
 from board import *
 
@@ -23,12 +24,27 @@ class Explorer:
     def __init__(self, board: Board, messages=True):
         self.actions_taken: int = 0
         self.facing: Facing = Facing.NORTH
-        self.location: Tuple[int, int] = (0, 0)
+        self.location: List[int, int] = [0, 0]
         self.is_dead: bool = False
         self.board: Board = deepcopy(board)
         self.display_messages: bool = messages
         self.arrows: int = board.wumpus_count
         self.has_gold: bool = False
+
+    def get_adjacent_cells(self) -> List[List[int]]:
+        x = self.location[0]
+        y = self.location[1]
+        adjacent_cells = []
+
+        if x > 0:
+            adjacent_cells.append([x - 1, y])
+        if x < self.board.size - 1:
+            adjacent_cells.append([x + 1, y])
+        if y > 0:
+            adjacent_cells.append([x, y - 1])
+        if y < self.board.size - 1:
+            adjacent_cells.append([x, y + 1])
+        return adjacent_cells
 
     def turn(self, direction: Direction) -> None:
         self.actions_taken += 1
@@ -58,38 +74,43 @@ class Explorer:
     def walk(self) -> bool:
         self.actions_taken += 1
         hit_something: bool = False
+        target_cell: List[int] = deepcopy(self.location)
+
         if self.facing == Facing.NORTH:
-            if self.location[1] == self.board.size - 1:
-                hit_something = True
-            else:
-                self.location[1] += 1
+            target_cell[1] += 1
         elif self.facing == Facing.EAST:
-            if self.location[0] == self.board.size - 1:
-                hit_something = True
-            else:
-                self.location[0] += 1
+            target_cell[0] += 1
         elif self.facing == Facing.SOUTH:
-            if self.location[1] == 0:
-                hit_something = True
-            else:
-                self.location[1] -= 1
+            target_cell[1] -= 1
         elif self.facing == Facing.WEST:
-            if self.location[0] == 0:
-                hit_something = True
-            else:
-                self.location[0] -= 1
+            target_cell[0] -= 1
+
+        if target_cell[0] < 0 \
+            or target_cell[1] < 0 \
+               or target_cell[0] > self.board.size - 1 \
+               or target_cell[0] > self.board.size - 1 \
+               or target_cell[1] > self.board.size - 1 \
+                or self.board.grid[target_cell[0]][target_cell[1]][CellContent.OBSTACLE]:
+            hit_something = True
+
         if hit_something:
             if self.display_messages:
                 print("You have bumped into something.")
-        elif self.board.grid[self.location[0]][self.location[1]][CellValue.WUMPUS]:
+        else:
+            self.location = target_cell
+
+        x = self.location[0]
+        y = self.location[1]
+
+        if self.board.grid[x][y][CellContent.WUMPUS]:
             if self.display_messages:
                 print("You have been eaten by a wumpus.")
             self.die()
-        elif self.board.grid[self.location[0]][self.location[1]][CellValue.PIT]:
+        elif self.board.grid[x][y][CellContent.PIT]:
             if self.display_messages:
                 print("You have fallen into a pit.")
             self.die()
-        elif self.board.grid[self.location[0]][self.location[1]][CellValue.GOLD]:
+        elif self.board.grid[x][y][CellContent.GOLD]:
             if self.display_messages:
                 print("You have found gold!")
             self.escape()
@@ -124,7 +145,7 @@ class Explorer:
         if self.display_messages:
             print("Targets are", targets)
         for target in targets:
-            if self.board.grid[target[0]][target[1]][CellValue.WUMPUS]:
+            if self.board.grid[target[0]][target[1]][CellContent.WUMPUS]:
                 self.board.kill_wumpus(target)
                 if self.display_messages:
                     print("A scream rings out through the darkness!")
