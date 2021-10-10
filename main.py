@@ -5,20 +5,39 @@ from board import *
 from rational_explorer import *
 
 if __name__ == '__main__':
-    # Example Resolution:
+    # Example Unification:
     knowledge_base: KnowledgeBase = KnowledgeBase()
 
-    sentence: Sentence = Sentence("p", "p", variables=["x"], negated=True)
-    sentence_2: Sentence = Sentence("q", "q", variables=["x"])
-    clause: Clause = Clause([sentence, sentence_2])
-    sentence_3: Sentence = Sentence("p", "p", variables=["x"])
-    clause_2: Clause = Clause([sentence_3])
+    # sentence: Sentence = Sentence("foo", "f", variables=["x"])
+    # clause: Clause = Clause([sentence])
+    # sentence_2: Sentence = Sentence("foo", "f", variables=["a"])
+    # clause_2: Clause = Clause([sentence_2])
+    # knowledge_base.set_rules([clause, clause_2])
+
+    sentence: Sentence = Sentence("foo", "f", variables=["x", "y"])
+    clause: Clause = Clause([sentence])
+    sentence_2: Sentence = Sentence("foo", "f", literals=[1, 2])
+    clause_2: Clause = Clause([sentence_2])
     knowledge_base.set_rules([clause, clause_2])
 
     print(knowledge_base)
-    print("resolving...")
-    knowledge_base.resolution()
+    print(f"unified: {knowledge_base.unify(knowledge_base.get_clause(0), knowledge_base.get_clause(1))}\n")
     print(knowledge_base)
+
+    # Example Resolution:
+    # knowledge_base: KnowledgeBase = KnowledgeBase()
+    #
+    # sentence: Sentence = Sentence("p", "p", variables=["x"], negated=True)
+    # sentence_2: Sentence = Sentence("q", "q", variables=["x"])
+    # clause: Clause = Clause([sentence, sentence_2])
+    # sentence_3: Sentence = Sentence("p", "p", variables=["x"])
+    # clause_2: Clause = Clause([sentence_3])
+    # knowledge_base.set_rules([clause, clause_2])
+    #
+    # print(knowledge_base)
+    # print("resolving...")
+    # knowledge_base.resolution()
+    # print(knowledge_base)
 
     # Example Rational:
     # board: Board = Board(size=5)

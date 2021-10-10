@@ -40,6 +40,7 @@ class KnowledgeBase:
     def remove_clause(self, clause_kb_id: int) -> None:
         self.kb.remove(self.get_clause(clause_kb_id))
         self.string = ""
+        self.clauses -= 1
         for i in range(clause_kb_id, len(self.kb)):
             current_id: int = self.kb[i].get_kb_id()
             self.kb[i].set_kb_id(current_id-1)
@@ -78,27 +79,45 @@ class KnowledgeBase:
         return resolved if not resolved else self.resolution()
 
     @staticmethod
-    def unify(x, y, sub_str: str) -> str:
+    def unify(x, y, *, theta: str = "") -> str:
         """
         Essentially want to replace variables in a Sentence with a literal from another Sentence to create an new Fact.
         :return:
         """
-        if sub_str == "failure":
-            return ""
-
-        return ""
+        if theta == "failure":
+            return theta
+        elif str(x) == str(y):
+            return theta
+        elif type(x) == str:
+            return KnowledgeBase.unify_variable(x, y, theta)
+        elif type(y) == str:
+            return KnowledgeBase.unify_variable(y, x, theta)
+        elif type(x) == Clause and type(y) == Clause:
+            x: Clause = x
+            y: Clause = y
+            return KnowledgeBase.unify(x.sentences, y.sentences, theta=theta)
+        elif type(x) == Sentence and type(y) == Sentence:
+            x: Sentence = x
+            y: Sentence = y
+            return KnowledgeBase.unify(x.arguments, y.arguments, theta=theta)
+        elif type(x) == list and type(y) == list:
+            return KnowledgeBase.unify(x[1:], y[1:], theta=KnowledgeBase.unify(x[0], y[0], theta=theta))
+        return "failure"
 
     @staticmethod
-    def unify_variable(expression, variable: str, sub_str: str) -> str:
-        value = None
-        if f"{variable}/{value}" in sub_str:
-            KnowledgeBase.unify(value, expression, sub_str)
-        elif f"{expression}/{value}" in sub_str:
-            KnowledgeBase.unify(variable, value, sub_str)
+    def unify_variable(expression, variable: str, theta: str) -> str:
+        if f"{variable}/" in theta:
+            beta: str = theta[theta.index("j") + 2:]
+            value: str = beta[:beta.index("}")]
+            KnowledgeBase.unify(value, expression, theta=theta)
+        elif f"{expression}/" in theta:
+            beta: str = theta[theta.index("j") + 2:]
+            value: str = beta[:beta.index("}")]
+            KnowledgeBase.unify(variable, value, theta=theta)
         elif KnowledgeBase.occur_check(variable, expression):
             return "failure"
         else:
-            return sub_str + f" {variable}/{expression}"
+            return theta + '{' + f"{variable}/{expression}" + '} '
 
     @staticmethod
     def occur_check(variable, expression) -> bool:
