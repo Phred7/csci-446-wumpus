@@ -50,26 +50,9 @@ class KnowledgeBase:
     def infer(self) -> None:
         pass
 
-    # def resolution(self) -> None:
-    #     last_clause: Clause = self.kb[-1]
-    #     for clause in self.kb:
-    #         if len(last_clause.sentences) == 1 and len(clause.sentences) == 2:  # last clause of the form: p(x)
-    #             if clause.sentences[0].negated ^ clause.sentences[1].negated:
-    #                 negated_sentence: Sentence = clause.sentences[0] if clause.sentences[0].negated else clause.sentences[1]
-    #                 sentence: Sentence = clause.sentences[0] if clause.sentences[1].negated else clause.sentences[1]
-    #                 last_sentence: Sentence = last_clause.sentences[0]
-    #                 if negated_sentence.name == last_sentence.name:
-    #                     if (last_sentence.variables == negated_sentence.variables == sentence.variables) and (last_sentence.literals == negated_sentence.literals == sentence.literals):
-    #                         # here the clauses are of the form: ~p(x) | q(x) and p(x)
-    #                         new_sentence: Sentence = Sentence(name=deepcopy(negated_sentence.name), identifier=deepcopy(negated_sentence.name), variables=deepcopy(negated_sentence.variables), literals=deepcopy(negated_sentence.literals))
-    #                         new_clause: Clause = Clause([new_sentence])
-    #                         self.kb.append(new_clause)
-    #         elif (len(last_clause.sentences) == 2) and ():  # last clause of the form: p(x) | q(x)
-    #             if len(clause.sentences) == 1:  # current clause of the form p(x)
-    #                 pass
-
-    def resolution(self) -> None:
+    def resolution(self) -> bool:
         last_clause: Clause = self.kb[-1]
+        resolved: bool = False
         for clause in self.kb:
             if last_clause == clause:
                 break
@@ -91,7 +74,8 @@ class KnowledgeBase:
                             self.remove_clause(short_clause.get_kb_id())
                             self.remove_clause(long_clause.get_kb_id())
                             self.append(new_clause)
-                            pass
+                            resolved = True
+        return resolved if not resolved else self.resolution()
 
     @staticmethod
     def unify(x, y, sub_str: str) -> str:
