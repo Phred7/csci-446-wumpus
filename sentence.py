@@ -10,6 +10,7 @@ class Sentence:
         self.identifier: str = identifier
         self.literals: List[int] = [] if literals is None else literals
         self.variables: List[str] = [] if variables is None else variables
+        self.arguments: List[str] = deepcopy(self.literals) if self.variables == [] else deepcopy(self.variables)
         self.vars: bool = True if len(self.variables) != 0 else False
         self.verbose: bool = False
         self.negated: bool = negated
