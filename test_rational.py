@@ -7,8 +7,16 @@ def TestRational():
     b.grid[0][1][CellContent.WUMPUS] = True
 
     ex: RationalExplorer = RationalExplorer(b)
+    ex.generate_graph()
+
     ex.update_knowledge_base()
-    print(ex.knowledge_base)
+
+    print()
+    print("Knowledge base after update:")
+    for i, clause in enumerate(ex.knowledge_base.kb):
+        print(i, clause)
+
+
 
     # sentence1: Sentence = Sentence("wumpus", "w", literals=[0, 1], negated=False)
     # sentence2: Sentence = Sentence("wumpus", "w", literals=[1, 0], negated=False)
