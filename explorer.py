@@ -1,27 +1,12 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from enum import Enum
-from typing import Tuple
 from typing import List
 
 from board import *
 
-
-class Direction(Enum):
-    LEFT = 0
-    RIGHT = 1
-
-
-class Facing(Enum):
-    NORTH = 0
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
-
-
 class Explorer:
 
-    def __init__(self, board: Board, messages=True):
+    def __init__(self, board: Board, messages=False):
         self.actions_taken: int = 0
         self.facing: Facing = Facing.NORTH
         self.location: List[int, int] = [0, 0]
@@ -70,7 +55,6 @@ class Explorer:
 
         return
 
-    # TODO: DOES NOT ACCOUNT FOR BUMPING OBSTACLE IN BOARD, ONLY EDGES
     def walk(self) -> bool:
         self.actions_taken += 1
         hit_something: bool = False
@@ -195,7 +179,7 @@ class Explorer:
             print(row)
 
     @abstractmethod
-    def act(self) -> bool:
+    def act(self) -> None:
         raise NotImplementedError
 
     # TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THROUGH SAFE THINGS IF POSSIBLE... Wouldn't this defeat the purpose of using a KB? I guess Im confused as to what this method would be doing

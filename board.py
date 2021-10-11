@@ -1,21 +1,7 @@
-from enum import IntEnum
 from random import randint
 from random import random
 import numpy as np
-
-
-class CellContent(IntEnum):
-    WUMPUS: int = 0
-    PIT: int = 1
-    OBSTACLE: int = 2
-    GOLD: int = 3
-
-
-class Sensation(IntEnum):
-    STENCH: int = 0
-    BREEZE: int = 1
-    GLIMMER: int = 2
-
+from enums import *
 
 class Board:
 
