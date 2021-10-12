@@ -43,7 +43,7 @@ class KnowledgeBase:
         self.clauses -= 1
         for i in range(clause_kb_id, len(self.kb)):
             current_id: int = self.kb[i].get_kb_id()
-            self.kb[i].set_kb_id(current_id-1)
+            self.kb[i].set_kb_id(current_id - 1)
 
     def get_clause(self, clause_kb_id: int) -> Clause:
         return self.kb[clause_kb_id]
@@ -60,13 +60,17 @@ class KnowledgeBase:
             if (len(last_clause) == 1 and len(clause) == 2) or len(last_clause) == 2 and len(clause) == 1:
                 long_clause: Clause = clause if len(clause) == 2 else last_clause
                 short_clause: Clause = clause if len(clause) == 1 else last_clause
-                if long_clause.sentences[0].negated ^ long_clause.sentences[1].negated:  # this tests to see if both clauses are defined in scope
-                    negated_sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[0].negated else long_clause.sentences[1]
-                    sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[1].negated else long_clause.sentences[1]
+                if long_clause.sentences[0].negated ^ long_clause.sentences[
+                        1].negated:  # this tests to see if both clauses are defined in scope
+                    negated_sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[0].negated else \
+                        long_clause.sentences[1]
+                    sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[1].negated else \
+                        long_clause.sentences[1]
                     short_sentence: Sentence = short_clause.sentences[0]
                     if negated_sentence.name == short_sentence.name:
-                        if (short_sentence.variables == negated_sentence.variables == sentence.variables) and (short_sentence.literals == negated_sentence.literals == sentence.literals):
-                            # here the clauses are of the form: ~p(x) | q(x), p(x)
+                        if (short_sentence.variables == negated_sentence.variables == sentence.variables) and (
+                                short_sentence.literals == negated_sentence.literals == sentence.literals):
+                            # here the clauses are of the form: ~p(x, y, z) | q(x, y, z), p(x, y, z)
                             new_sentence: Sentence = Sentence(name=deepcopy(sentence.name),
                                                               identifier=deepcopy(sentence.name),
                                                               variables=deepcopy(sentence.variables),
@@ -76,7 +80,7 @@ class KnowledgeBase:
                             self.remove_clause(long_clause.get_kb_id())
                             self.append(new_clause)
                             resolved = True
-        return resolved if not resolved else self.resolution()
+        return resolved if not resolved else self.resolution()  # TODO: may not want recursive feature?
 
     @staticmethod
     def unify(x, y, *, theta: str = "") -> str:
