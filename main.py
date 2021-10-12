@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # print(rational.knowledge_base)
     # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
 
-    # Example KB:
+    #Example KB:
     # kb: KnowledgeBase = KnowledgeBase()
     # sentence: Sentence = Sentence("wumpus", "w", variables=['x', 'y'])
     # sentence_2: Sentence = Sentence("wumpus", "w", variables=['y', 'z'], negated=True)
@@ -89,3 +89,9 @@ if __name__ == '__main__':
     # clause_2: Clause = Clause([sentence_3])
     # kb.set_rules([clause, clause_2])
     # print("\n\n" + str(kb))
+
+    # # chaining example
+    # kb: KnowledgeBase = KnowledgeBase()
+    # a_s1: Sentence = Sentence("stench", "s", variables=["x", 'y'], negated=True)
+    # a: Clause = Clause([a_s1])
+    # kb.forward_chaining(a)
