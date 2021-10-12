@@ -21,12 +21,12 @@ class Player:
             print('s: shoot arrow')
             print('d: display board')
             print('q: exit program')
-            print('You have', self.e.arrowCount, 'arrows.')
+            print('You have', self.e.arrows, 'arrows.')
         elif result == "w":
             self.e.walk()
-            if self.e.isDead:
+            if self.e.is_dead:
                 return False
-            elif self.e.hasGold:
+            elif self.e.has_gold:
                 return False
         elif result == 'l':
             self.e.turn(Direction.LEFT)
@@ -50,6 +50,6 @@ def main():
     #p.b.disp()
     while p.prompt():
         continue
-    print(p.e.actionsTaken)
+    print(p.e.actions_taken)
     p.b.disp()
 main()
