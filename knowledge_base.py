@@ -51,6 +51,21 @@ class KnowledgeBase:
     def infer(self) -> None:
         pass
 
+    def forward_chaining(self, a: Clause):
+        print(a)
+        for r in self.kb:
+            print(r)
+
+        # while True:
+        #     new = []
+        #     for r in self.kb:
+        #         p, q = r
+        #         for theta in p
+        #             #if substitution of theta and p is bad
+        #                 #q_prime = substitution of theta and q
+        #                 #if unify(x, q_prime) is None for x in seld.kb
+        #                    #self.kb.append(q_prime)
+
     def resolution(self) -> bool:
         last_clause: Clause = self.kb[-1]
         resolved: bool = False
@@ -128,3 +143,5 @@ class KnowledgeBase:
         if str(variable) in str(expression):
             return True
         return False
+
+
