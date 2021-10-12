@@ -19,6 +19,7 @@ def explore(explorer: RationalExplorer) -> int:
 
 if __name__ == '__main__':
 
+    # Threading:
     board_sizes: List[int] = [5, 10, 15, 20, 25]
 
     for size in board_sizes:
@@ -33,10 +34,10 @@ if __name__ == '__main__':
             thread.start()
         print(f"Threads 0-{thread_count - 1} started")
         for thread in threads:
-            thread.join()
+            Thread.join(thread)
+            Thread._
         print(f"Threads 0-{thread_count - 1} joined")
 
-    pass
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
     # sentence: Sentence = Sentence("foo", "f", variables=["x"])
