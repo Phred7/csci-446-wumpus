@@ -20,23 +20,23 @@ def explore(explorer: RationalExplorer) -> int:
 if __name__ == '__main__':
 
     # Threading:
-    board_sizes: List[int] = [5, 10, 15, 20, 25]
-
-    for size in board_sizes:
-        threads: List[Thread] = []
-        thread_count: int = 25
-        for i in range(0, thread_count):
-            board: Board = Board(size)
-            rational: RationalExplorer = RationalExplorer(deepcopy(board))
-            threads.append(threading.Thread(target=explore, args=(deepcopy(rational),),
-                                            name=f"rational_explorer_thread{i}"))
-        for thread in threads:
-            thread.start()
-        print(f"Threads 0-{thread_count - 1} started")
-        for thread in threads:
-            Thread.join(thread)
-            Thread._
-        print(f"Threads 0-{thread_count - 1} joined")
+    # board_sizes: List[int] = [5, 10, 15, 20, 25]
+    #
+    # for size in board_sizes:
+    #     threads: List[Thread] = []
+    #     thread_count: int = 25
+    #     for i in range(0, thread_count):
+    #         board: Board = Board(size)
+    #         rational: RationalExplorer = RationalExplorer(deepcopy(board))
+    #         threads.append(threading.Thread(target=explore, args=(deepcopy(rational),),
+    #                                         name=f"rational_explorer_thread{i}"))
+    #     for thread in threads:
+    #         thread.start()
+    #     print(f"Threads 0-{thread_count - 1} started")
+    #     for thread in threads:
+    #         Thread.join(thread)
+    #         #Thread._
+    #     print(f"Threads 0-{thread_count - 1} joined")
 
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
@@ -74,11 +74,11 @@ if __name__ == '__main__':
     # print(knowledge_base)
 
     # Example Rational:
-    # board: Board = Board(size=5)
-    # board.generate_board()
-    # rational: RationalExplorer = RationalExplorer(board)
-    # print(rational.knowledge_base)
-    # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
+    board: Board = Board(size=5)
+    board.generate_board()
+    rational: RationalExplorer = RationalExplorer(board)
+    print(rational.knowledge_base)
+    print(f"{rational.board.__class__.__name__}:\n{rational.board}")
 
     #Example KB:
     # kb: KnowledgeBase = KnowledgeBase()

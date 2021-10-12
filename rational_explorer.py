@@ -157,7 +157,7 @@ class RationalExplorer(Explorer):
 
         r4_s1: Sentence = Sentence("bump", "bu", variables = ["x", "y"], negated = True)
         r4_s2: Sentence = Sentence("obstacle", "o", variables = ["x", "y"])
-        rule4: Clause = Clause(r4_s1, r4_s2)
+        rule4: Clause = Clause([r4_s1, r4_s2])
 
         self.knowledge_base.set_rules([rule1, rule2, rule3, rule4])
 
