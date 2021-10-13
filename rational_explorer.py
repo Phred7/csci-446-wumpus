@@ -8,8 +8,6 @@ class RationalExplorer(Explorer):
 
     def __init__(self, board: Board):
         super().__init__(board)
-        self.safe_cells: List[List[int, int]] = []
-        self.safe_cells.append(self.location)
         self.frontier: List[List[int]] = []
         self.knowledge_base: KnowledgeBase = KnowledgeBase()
         self.init_knowledge_base()
@@ -33,43 +31,68 @@ class RationalExplorer(Explorer):
         return bumped
 
     def act(self) -> None:
+        if self.actions_taken > 100:
+            self.die()
+        #print()
+        #print("Acting.")
+        #print("Current location is", self.location, self.facing)
+        #print("Updating knowledge base.")
         self.update_knowledge_base()
 
         # TODO: TRY TO PROVE THINGS ABOUT FRONTIER CELLS? OR JUST DO RESOLUTION AND PROVE EVERYTHING WE CAN
-        #self.knowledge_base.resolution()
+        #print("Performing resolution.\nSize of knowledge base before resolution:", len(self.knowledge_base.kb))
+        self.knowledge_base.infer()
+        #print("Size of knowledge base after resolution:", len(self.knowledge_base.kb))
 
+        #print("Marking my location as safe.")
         # the cell i'm in is safe
         if self.location not in self.safe_cells:
             self.safe_cells.append(self.location)
 
+        #print("Removing my location from frontier.")
         # the cell i'm in is not in the frontier
         if self.location in self.frontier:
             self.frontier.remove(self.location)
 
+        #print("Adding neighboring cells to frontier if appropriate.")
         # if adjacent cells weren't already in the frontier and aren't visited, add them
         for adjacent_cell in self.get_adjacent_cells():
             if adjacent_cell not in self.safe_cells and adjacent_cell not in self.frontier:
                 self.frontier.append(adjacent_cell)
 
+        #print("Frontier is now:")
+        #print(self.frontier)
+
+        #print("Assigning danger values to frontier.")
         # assign values to each frontier, create a queue of frontier cells in ascending order of danger
         queue: List[Tuple[List[int], float]]  = []
         for cell in self.frontier:
             queue.append((cell, self.assign_danger_value(cell)))
         queue.sort(key = lambda x : x[1], reverse=True)
 
-        self.path(queue.pop()[0])
+        #print("Danger levels in frontier cells:")
+        #print(queue)
 
+        #print("Pathing to safest frontier cell.")
+        target = tuple(queue.pop()[0])
+        #print("Safest frontier cell is:", target)
+        path = self.path(target)
+
+        #print("Path to that cell is:", path)
+        for step in path:
+            if step == 'w':
+                self.walk()
+            elif step == 'l':
+                self.turn(Direction.LEFT)
+            elif step == 'r':
+                self.turn(Direction.RIGHT)
+
+        #print("Ending action.")
         return
 
     def update_knowledge_base(self):
-        print("updating knowledge base")
         sensations: List[Sensation] = self.observe()
-        print("sensations:")
-        for i in range(len(sensations)):
-            if sensations[i]:
-                print(Sensation(i).name)
         adjacent_cells = self.get_adjacent_cells()
-
 
         if sensations[Sensation.BREEZE]:
             pit_sentences: List[Sentence] = []
@@ -195,8 +218,35 @@ class RationalExplorer(Explorer):
                     gold_likelihood = float('inf')
                     break
                 elif str(gold_not_there_sentence) == str(sentence):
-                    gold_likelihood += 1 / len(clause)
+                    gold_likelihood += 0
 
         return wumpus_danger + pit_danger - gold_likelihood
 
-
+    def disp(self):
+        rows = []
+        for i in range(self.board.size):
+            string = "|"
+            for j in range(self.board.size):
+                if i == self.location[1] and j == self.location[0]:
+                    if self.facing == Facing.NORTH:
+                        string += "^|"
+                    elif self.facing == Facing.EAST:
+                        string += ">|"
+                    elif self.facing == Facing.SOUTH:
+                        string += "v|"
+                    elif self.facing == Facing.WEST:
+                        string += "<|"
+                else:
+                    danger = self.assign_danger_value([j, i])
+                    if [j, i] in self.safe_cells:
+                        string += "S|"
+                    elif danger == 0:
+                        string += '0|'
+                    elif danger > 0:
+                        string += 'X|'
+                    else:
+                        string += '0|'
+            rows.append(string)
+        rows.reverse()
+        for row in rows:
+            print(row)
