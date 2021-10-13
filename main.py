@@ -74,28 +74,28 @@ if __name__ == '__main__':
     # print(knowledge_base)
 
     # Example Rational:
-    # board: Board = Board(size=5)
-    # board.generate_board()
-    # rational: RationalExplorer = RationalExplorer(board)
-    # print(rational.knowledge_base)
-    # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
+    board: Board = Board(size=5)
+    board.generate_board()
+    rational: RationalExplorer = RationalExplorer(board)
+    print(rational.knowledge_base)
+    print(f"{rational.board.__class__.__name__}:\n{rational.board}")
 
     # Example KB:
-    kb: KnowledgeBase = KnowledgeBase()
-
-    sentence: Sentence = Sentence("wumpus", "w", variables=['x', 'y'])
-    sentence_2: Sentence = Sentence("wumpus", "w", variables=['y', 'z'], negated=True)
-    clause: Clause = Clause([sentence, sentence_2])
-    kb.set_rules([clause])
-
-    sentence_3: Sentence = Sentence("wumpus", "w", literals=[0, 0], negated=True)
-    sentence_4: Sentence = Sentence("test", "t", variables=["10-1", "20+3"])
-    clause_2: Clause = Clause([sentence_3])
-    clause_3: Clause = Clause([sentence_4])
-    kb.append(clause_2)
-    kb.append(clause_3)
-    print("\n\n" + str(kb))
-
-    query: Sentence = Sentence("test", "t", variables=["10", "256"])
-    print(f"Query: {kb.query(query)}")
+    # kb: KnowledgeBase = KnowledgeBase()
+    #
+    # sentence: Sentence = Sentence("wumpus", "w", variables=['x', 'y'])
+    # sentence_2: Sentence = Sentence("wumpus", "w", variables=['y', 'z'], negated=True)
+    # clause: Clause = Clause([sentence, sentence_2])
+    # kb.set_rules([clause])
+    #
+    # sentence_3: Sentence = Sentence("wumpus", "w", literals=[0, 0], negated=True)
+    # sentence_4: Sentence = Sentence("test", "t", variables=["10-1", "20+3"])
+    # clause_2: Clause = Clause([sentence_3])
+    # clause_3: Clause = Clause([sentence_4])
+    # kb.append(clause_2)
+    # kb.append(clause_3)
+    # print("\n\n" + str(kb))
+    #
+    # query: Sentence = Sentence("test", "t", variables=["10", "256"])
+    # print(f"Query: {kb.query(query)}")
 

@@ -84,7 +84,7 @@ class KnowledgeBase:
                                                               variables=deepcopy(sentence.variables),
                                                               literals=deepcopy(sentence.literals))
                             new_clause: Clause = Clause([new_sentence])
-                            self.remove_clause(short_clause.get_kb_id())
+                            # self.remove_clause(short_clause.get_kb_id())
                             self.remove_clause(long_clause.get_kb_id())
                             self.append(new_clause)
                             resolved = True
