@@ -21,6 +21,7 @@ class Sentence:
             string: str = f"{'~' if self.negated else ''}{self.name if self.verbose else self.identifier}("
             arguments = self.variables if self.vars else self.literals
             for i in range(len(arguments)):
+                arguments[i] = eval(arguments[i]) if type(arguments[i]) == str and ("+" in arguments[i] or "-" in arguments[i]) else arguments[i]
                 string += str(arguments[i])
                 if i != len(arguments)-1:
                     string += ", "

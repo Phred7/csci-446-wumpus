@@ -13,30 +13,31 @@ def explore(explorer: RationalExplorer) -> int:
     Used to run this explorer on it's board.
     :return:
     """
-    explorer.init_knowledge_base()
+
     return 0
 
 
 if __name__ == '__main__':
 
-    board_sizes: List[int] = [5, 10, 15, 20, 25]
+    # Threading:
+    # board_sizes: List[int] = [5, 10, 15, 20, 25]
+    #
+    # for size in board_sizes:
+    #     threads: List[Thread] = []
+    #     thread_count: int = 25
+    #     for i in range(0, thread_count):
+    #         board: Board = Board(size)
+    #         rational: RationalExplorer = RationalExplorer(deepcopy(board))
+    #         threads.append(threading.Thread(target=explore, args=(deepcopy(rational),),
+    #                                         name=f"rational_explorer_thread{i}"))
+    #     for thread in threads:
+    #         thread.start()
+    #     print(f"Threads 0-{thread_count - 1} started")
+    #     for thread in threads:
+    #         Thread.join(thread)
+    #         #Thread._
+    #     print(f"Threads 0-{thread_count - 1} joined")
 
-    for size in board_sizes:
-        threads: List[Thread] = []
-        thread_count: int = 25
-        for i in range(0, thread_count):
-            board: Board = Board(size)
-            rational: RationalExplorer = RationalExplorer(deepcopy(board))
-            threads.append(threading.Thread(target=explore, args=(deepcopy(rational),),
-                                            name=f"rational_explorer_thread{i}"))
-        for thread in threads:
-            thread.start()
-        print(f"Threads 0-{thread_count - 1} started")
-        for thread in threads:
-            thread.join()
-        print(f"Threads 0-{thread_count - 1} joined")
-
-    pass
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
     # sentence: Sentence = Sentence("foo", "f", variables=["x"])
@@ -79,13 +80,22 @@ if __name__ == '__main__':
     # print(rational.knowledge_base)
     # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
 
-    #Example KB:
-    # kb: KnowledgeBase = KnowledgeBase()
-    # sentence: Sentence = Sentence("wumpus", "w", variables=['x', 'y'])
-    # sentence_2: Sentence = Sentence("wumpus", "w", variables=['y', 'z'], negated=True)
-    # sentence_3: Sentence = Sentence("wumpus", "w", literals=[0, 0], negated=True)
-    # clause: Clause = Clause([sentence, sentence_2])
-    # clause_2: Clause = Clause([sentence_3])
-    # kb.set_rules([clause, clause_2])
-    # print("\n\n" + str(kb))
+    # Example KB:
+    kb: KnowledgeBase = KnowledgeBase()
+
+    sentence: Sentence = Sentence("wumpus", "w", variables=['x', 'y'])
+    sentence_2: Sentence = Sentence("wumpus", "w", variables=['y', 'z'], negated=True)
+    clause: Clause = Clause([sentence, sentence_2])
+    kb.set_rules([clause])
+
+    sentence_3: Sentence = Sentence("wumpus", "w", literals=[0, 0], negated=True)
+    sentence_4: Sentence = Sentence("test", "t", variables=["10-1", "20+3"])
+    clause_2: Clause = Clause([sentence_3])
+    clause_3: Clause = Clause([sentence_4])
+    kb.append(clause_2)
+    kb.append(clause_3)
+    print("\n\n" + str(kb))
+
+    query: Sentence = Sentence("test", "t", variables=["10", "256"])
+    print(f"Query: {kb.query(query)}")
 
