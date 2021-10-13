@@ -37,6 +37,13 @@ class KnowledgeBase:
         self.kb.append(item)
         self.infer()
 
+    def query(self, query_sentence: Sentence) -> bool:
+        for clause in self.kb:
+            if not clause.rule:
+                if str(query_sentence) == str(clause):
+                    return True
+        return False
+
     def remove_clause(self, clause_kb_id: int) -> None:
         self.kb.remove(self.get_clause(clause_kb_id))
         self.string = ""
