@@ -89,8 +89,3 @@ if __name__ == '__main__':
     # kb.set_rules([clause, clause_2])
     # print("\n\n" + str(kb))
 
-    # # chaining example
-    # kb: KnowledgeBase = KnowledgeBase()
-    # a_s1: Sentence = Sentence("stench", "s", variables=["x", 'y'], negated=True)
-    # a: Clause = Clause([a_s1])
-    # kb.forward_chaining(a)
