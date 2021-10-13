@@ -1,21 +1,26 @@
-import random
+from random import seed
 
 from rational_explorer import *
 
 def TestRational():
     b: Board = Board()
     b.grid[0][1][CellContent.WUMPUS] = True
-
-    ex: RationalExplorer = RationalExplorer(b)
-    ex.generate_graph()
-
-    ex.update_knowledge_base()
-
+    b.disp()
     print()
-    print("Knowledge base after update:")
-    for i, clause in enumerate(ex.knowledge_base.kb):
-        print(i, clause)
+    ex: RationalExplorer = RationalExplorer(b)
+    print(ex.knowledge_base)
+    ex.update_knowledge_base()
+    print(ex.knowledge_base)
 
+    # while (not ex.is_dead) and (not ex.has_gold):
+    #     ex.act()
+    #     ex.disp()
+    #     print()
+    # if ex.has_gold:
+    #     print("Found gold")
+    # else:
+    #     print("Died")
+    # print("finished")
 
 
     # sentence1: Sentence = Sentence("wumpus", "w", literals=[0, 1], negated=False)
