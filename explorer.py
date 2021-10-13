@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from typing import List
+from typing import Tuple
 
 from board import *
+
 
 class Explorer:
 
     def __init__(self, board: Board, messages=False):
+
         self.actions_taken: int = 0
         self.facing: Facing = Facing.NORTH
         self.location: List[int, int] = [0, 0]
@@ -15,6 +18,11 @@ class Explorer:
         self.display_messages: bool = messages
         self.arrows: int = board.wumpus_count
         self.has_gold: bool = False
+        self.generate_graph()
+        self.safe_cells: List[List[int, int]] = []
+        self.safe_cells.append(self.location)
+        self.history = [self.location]
+        return
 
     def get_adjacent_cells(self) -> List[List[int]]:
         x = self.location[0]
@@ -32,6 +40,7 @@ class Explorer:
         return adjacent_cells
 
     def turn(self, direction: Direction) -> None:
+        self.history.append('t')
         self.actions_taken += 1
         if direction == Direction.RIGHT:
             if self.facing == Facing.NORTH:
@@ -56,6 +65,7 @@ class Explorer:
         return
 
     def walk(self) -> bool:
+        self.history.append('w')
         self.actions_taken += 1
         hit_something: bool = False
         target_cell: List[int] = deepcopy(self.location)
@@ -70,10 +80,10 @@ class Explorer:
             target_cell[0] -= 1
 
         if target_cell[0] < 0 \
-            or target_cell[1] < 0 \
-               or target_cell[0] > self.board.size - 1 \
-               or target_cell[0] > self.board.size - 1 \
-               or target_cell[1] > self.board.size - 1 \
+                or target_cell[1] < 0 \
+                or target_cell[0] > self.board.size - 1 \
+                or target_cell[0] > self.board.size - 1 \
+                or target_cell[1] > self.board.size - 1 \
                 or self.board.grid[target_cell[0]][target_cell[1]][CellContent.OBSTACLE]:
             hit_something = True
 
@@ -82,6 +92,8 @@ class Explorer:
                 print("You have bumped into something.")
         else:
             self.location = target_cell
+
+        self.history.append(self.location)
 
         x = self.location[0]
         y = self.location[1]
@@ -182,7 +194,117 @@ class Explorer:
     def act(self) -> None:
         raise NotImplementedError
 
-    # TODO: IMPLEMENT PATHFINDING. GOTO COORDS (X, Y), THROUGH SAFE THINGS IF POSSIBLE... Wouldn't this defeat the purpose of using a KB? I guess Im confused as to what this method would be doing
-    def path(self, coords):
-        self.location = coords
+    # METHODS USED FOR PATHFINDING THRU GRAPH REPRESENTING BOARD
+
+    # this method returns a list of vertices, 4 for each cell, which correspond to a cell and a facing.
+    # it also returns an adjacency matrix of strings.
+    def generate_graph(self) -> None:
+        # generate list of vertices
+        V: List[Tuple[Tuple[int], Facing]] = []
+        for i in range(self.board.size):
+            for j in range(self.board.size):
+                for k in Facing:
+                    V.append(((i, j), k))
+
+        # generate list of edges. string representation: all edges have the same weight, 'l', 'r', 'w' indicate
+        # movement options, 'n' represents 'there is no edge between these two'
+        # dictionary where key is tuple of origin -> destination, value is movement option
+
+        E = {}
+
+        for v_1 in V:
+            for v_2 in V:
+                key: Tuple[Tuple[Tuple[int], Facing], Tuple[Tuple[int], Facing]] = (v_1, v_2)
+                # quality of life for easy access to x, y and facing
+                x_1 = v_1[0][0]
+                y_1 = v_1[0][1]
+                x_2 = v_2[0][0]
+                y_2 = v_2[0][1]
+                f_1 = v_1[1]
+                f_2 = v_2[1]
+
+                # two vertices are in the same cell
+                if v_1[0] == v_2[0]:
+                    if (f_1 == Facing.NORTH and f_2 == Facing.EAST) \
+                            or (f_1 == Facing.EAST and f_2 == Facing.SOUTH) \
+                            or (f_1 == Facing.SOUTH and f_2 == Facing.WEST) \
+                            or (f_1 == Facing.WEST and f_2 == Facing.NORTH):
+
+                        E[key] = 'r'
+
+                    elif (f_1 == Facing.NORTH and f_2 == Facing.WEST) \
+                            or (f_1 == Facing.WEST and f_2 == Facing.SOUTH) \
+                            or (f_1 == Facing.SOUTH and f_2 == Facing.EAST) \
+                            or (f_1 == Facing.EAST and f_2 == Facing.NORTH):
+
+                        E[key] = 'l'
+
+                    else:
+                        E[key] = 'n'
+
+                # if v_1 is to the left of v_2
+                elif (x_1 == x_2 - 1) and (y_1 == y_2) and (f_1 == Facing.EAST) and (f_2 == Facing.EAST):
+                    E[key] = 'w'
+
+                # if v_1 is to the right of v_2
+                elif (x_1 == x_2 + 1) and (y_1 == y_2) and (f_1 == Facing.WEST) and (f_2 == Facing.WEST):
+                    E[key] = 'w'
+
+                # if v_1 is above v_2
+                elif (x_1 == x_2) and (y_1 == y_2 + 1) and (f_1 == Facing.SOUTH) and (f_2 == Facing.SOUTH):
+                    E[key] = 'w'
+
+                # if v_1 is below v_2
+                elif (x_1 == x_2) and (y_1 == y_2 - 1) and (f_1 == Facing.NORTH) and (f_2 == Facing.NORTH):
+                    E[key] = 'w'
+
+                # no relation between v_1 and v_2
+                else:
+                    E[key] = 'n'
+
+        self.G = (V, E)
         return
+
+    # breadth first search
+    def path(self, target: Tuple[int]) -> List[str]:
+        V, E = self.G
+
+        # we path to the node representing facing north in the target cell, then remove any excess turns
+        path = self.breadth_first_search((target, Facing.NORTH), E)
+        while path[-1] != 'w':
+            path = path[:-1]
+        return path
+
+    def breadth_first_search(self, target: Tuple[Tuple[int], Facing], E) -> List[str]:
+        predecessors = {}
+
+        s = (tuple(self.location), self.facing)
+        queue = []
+        queue.append(s)
+
+        safe_cells_with_facings: List[Tuple[Tuple[int], Facing]] = []
+        for cell in self.safe_cells:
+            for facing in Facing:
+                safe_cells_with_facings.append((tuple(cell), facing))
+
+
+        while queue:
+            s = queue.pop(0)
+            if s == target:
+                path = []
+                step = s
+                while step != (tuple(self.location), self.facing):
+
+                    path.append(E[(predecessors[step], step)])
+                    step = predecessors[step]
+                path.reverse()
+                return path
+            for edge in E.keys():
+                if edge[0] == s \
+                        and edge[1] not in predecessors.keys() \
+                        and E[edge] != 'n' \
+                        and edge[1] != (tuple(self.location), self.facing)\
+                        and (edge[1] in safe_cells_with_facings or edge[1][0] == target[0]):
+                            predecessors[edge[1]] = s
+                            queue.append(edge[1])
+        raise IOError("Unable to find a path.")

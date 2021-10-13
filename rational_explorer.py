@@ -1,4 +1,4 @@
-from typing import List
+from typing import Tuple
 
 from explorer import *
 from knowledge_base import *
@@ -28,77 +28,92 @@ class RationalExplorer(Explorer):
             elif self.facing == Facing.WEST:
                 target_cell[0] -= 1
 
-            obstacle_clause: Clause = Clause([Sentence("obstacle", "o", literals=target_cell, negated=False)])
-            self.knowledge_base.append(obstacle_clause)
+            bump_clause: Clause = Clause([Sentence("bump", "bu", literals=target_cell, negated=False)])
+            self.knowledge_base.append(bump_clause)
         return bumped
 
     def act(self) -> None:
+        if self.actions_taken > 100:
+            self.die()
+        #print()
+        #print("Acting.")
+        #print("Current location is", self.location, self.facing)
+        #print("Updating knowledge base.")
         self.update_knowledge_base()
 
         # TODO: TRY TO PROVE THINGS ABOUT FRONTIER CELLS? OR JUST DO RESOLUTION AND PROVE EVERYTHING WE CAN
-        #self.knowledge_base.resolution()
+        #print("Performing resolution.\nSize of knowledge base before resolution:", len(self.knowledge_base.kb))
+        self.knowledge_base.infer()
+        #print("Size of knowledge base after resolution:", len(self.knowledge_base.kb))
 
+        #print("Marking my location as safe.")
         # the cell i'm in is safe
         if self.location not in self.safe_cells:
             self.safe_cells.append(self.location)
 
+        #print("Removing my location from frontier.")
         # the cell i'm in is not in the frontier
         if self.location in self.frontier:
             self.frontier.remove(self.location)
 
+        #print("Adding neighboring cells to frontier if appropriate.")
         # if adjacent cells weren't already in the frontier and aren't visited, add them
         for adjacent_cell in self.get_adjacent_cells():
             if adjacent_cell not in self.safe_cells and adjacent_cell not in self.frontier:
                 self.frontier.append(adjacent_cell)
 
+        #print("Frontier is now:")
+        #print(self.frontier)
+
+        #print("Assigning danger values to frontier.")
         # assign values to each frontier, create a queue of frontier cells in ascending order of danger
         queue: List[Tuple[List[int], float]]  = []
         for cell in self.frontier:
             queue.append((cell, self.assign_danger_value(cell)))
         queue.sort(key = lambda x : x[1], reverse=True)
 
-        self.path(queue.pop()[0])
+        #print("Danger levels in frontier cells:")
+        #print(queue)
 
+        #print("Pathing to safest frontier cell.")
+        target = tuple(queue.pop()[0])
+        #print("Safest frontier cell is:", target)
+        path = self.path(target)
+
+        #print("Path to that cell is:", path)
+        for step in path:
+            if step == 'w':
+                self.walk()
+            elif step == 'l':
+                self.turn(Direction.LEFT)
+            elif step == 'r':
+                self.turn(Direction.RIGHT)
+
+        #print("Ending action.")
         return
 
     def update_knowledge_base(self):
-        print("updating knowledge base")
         sensations: List[Sensation] = self.observe()
-        print("sensations:", sensations)
-        adjacent_cells = self.get_adjacent_cells()
 
-        pit_sentences: List[Sentence] = []
-        if sensations[Sensation.BREEZE]:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("pit", "p", literals=cell, negated=False))
-        else:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("pit", "p", literals=cell, negated=True))
+        # bleh ternary statements
 
-        pit_clause: Clause = Clause(pit_sentences)
-        self.knowledge_base.append(pit_clause)
+        stench_sentence: Sentence = Sentence('stench', 's', literals = self.location, negated=False) \
+            if sensations[Sensation.STENCH] \
+            else Sentence('stench', 's', literals = self.location, negated=True)
 
-        wumpus_sentences: List[Sentence] = []
-        if sensations[Sensation.STENCH]:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("wumpus", "w", literals=cell, negated=False))
-        else:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("wumpus", "w", literals=cell, negated=True))
 
-        wumpus_clause: Clause = Clause(wumpus_sentences)
-        self.knowledge_base.append(wumpus_clause)
+        breeze_sentence: Sentence = Sentence('breeze', 'b', literals=self.location, negated=False) \
+            if sensations[Sensation.BREEZE] \
+            else Sentence('breeze', 'b', literals=self.location, negated=True)
 
-        gold_sentences: List[Sentence] = []
-        if sensations[Sensation.GLIMMER]:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("gold", "g", literals=cell, negated=False))
-        else:
-            for cell in adjacent_cells:
-                pit_sentences.append(Sentence("gold", "g", literals=cell, negated=True))
 
-        gold_clause: Clause = Clause(gold_sentences)
-        self.knowledge_base.append(gold_clause)
+        glimmer_sentence: Sentence =  Sentence('glimmer', 'gl', literals = self.location, negated=False) \
+            if sensations[Sensation.GLIMMER] \
+            else Sentence('glimmer', 'gl', literals = self.location, negated=True)
+
+        self.knowledge_base.append(Clause([breeze_sentence]))
+        self.knowledge_base.append(Clause([stench_sentence]))
+        self.knowledge_base.append(Clause([glimmer_sentence]))
 
         return
 
@@ -196,6 +211,35 @@ class RationalExplorer(Explorer):
                     gold_likelihood = float('inf')
                     break
                 elif str(gold_not_there_sentence) == str(sentence):
-                    gold_likelihood += 1 / len(clause)
+                    gold_likelihood += 0
 
         return wumpus_danger + pit_danger - gold_likelihood
+
+    def disp(self):
+        rows = []
+        for i in range(self.board.size):
+            string = "|"
+            for j in range(self.board.size):
+                if i == self.location[1] and j == self.location[0]:
+                    if self.facing == Facing.NORTH:
+                        string += "^|"
+                    elif self.facing == Facing.EAST:
+                        string += ">|"
+                    elif self.facing == Facing.SOUTH:
+                        string += "v|"
+                    elif self.facing == Facing.WEST:
+                        string += "<|"
+                else:
+                    danger = self.assign_danger_value([j, i])
+                    if [j, i] in self.safe_cells:
+                        string += "S|"
+                    elif danger == 0:
+                        string += '0|'
+                    elif danger > 0:
+                        string += 'X|'
+                    else:
+                        string += '0|'
+            rows.append(string)
+        rows.reverse()
+        for row in rows:
+            print(row)
