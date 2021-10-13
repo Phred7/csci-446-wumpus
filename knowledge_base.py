@@ -55,6 +55,13 @@ class KnowledgeBase:
     def get_clause(self, clause_kb_id: int) -> Clause:
         return self.kb[clause_kb_id]
 
+    def get_rules(self) -> List[Clause]:
+        rules: List[Clause] = []
+        for clause in self.kb:
+            if clause.rule:
+                rules.append(clause)
+        return rules
+
     def infer(self) -> None:
         pass
 
