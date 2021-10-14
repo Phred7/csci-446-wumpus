@@ -16,6 +16,7 @@ class Clause:
         self.string: str = ""
         self.kb_id: int = -1
         self.rule: bool = False
+        self.new: bool = True
 
     def __str__(self) -> str:  # TODO anytime a clause is modified self.string MUST be set to ""
         """
@@ -42,3 +43,6 @@ class Clause:
 
     def set_rule(self) -> None:
         self.rule = True
+
+    def negate(self) -> None:
+        self.negated = False if self.negated else True

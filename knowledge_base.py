@@ -35,7 +35,6 @@ class KnowledgeBase:
         self.string = ""
         self.clauses += 1
         self.kb.append(item)
-        self.infer()
 
     def query(self, query_sentence: Sentence) -> bool:
         for clause in self.kb:
@@ -69,7 +68,18 @@ class KnowledgeBase:
                 facts.append(clause)
         return facts
 
+    def get_new_facts(self) -> List[Clause]:
+        new_facts: List[Clause] = []
+        for clause in self.get_rules():
+            if clause.new:
+                new_facts.append(clause)
+        return new_facts
+
     def infer(self) -> None:
+        new_facts: List[Clause] = self.get_new_facts()
+        for fact in new_facts:
+            self.generate_facts_from_senses(fact)
+            fact.new = False
         pass
 
     def forward_chaining(self, a: Clause):
@@ -97,7 +107,7 @@ class KnowledgeBase:
                 long_clause: Clause = clause if len(clause) == 2 else last_clause
                 short_clause: Clause = clause if len(clause) == 1 else last_clause
                 if long_clause.sentences[0].negated ^ long_clause.sentences[
-                        1].negated:  # this tests to see if both clauses are defined in scope
+                    1].negated:  # this tests to see if both clauses are defined in scope
                     negated_sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[0].negated else \
                         long_clause.sentences[1]
                     sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[1].negated else \
@@ -146,13 +156,13 @@ class KnowledgeBase:
 
     @staticmethod
     def unify_variable(expression, variable: str, theta: str) -> str:
-        if f"{variable}/" in theta:
-            if type(variable) == int:
-                variable = str(variable)
-            beta: str = theta[theta.index(variable) + 2:]
-            value: str = beta[:beta.index("}")]
-            return KnowledgeBase.unify(value, expression, theta=theta)
-        elif f"{expression}/" in theta:
+        # if f"{variable}/" in theta:
+        #     if type(variable) == int:
+        #         variable = str(variable)
+        #     beta: str = theta[theta.index(variable) + 2:]
+        #     value: str = beta[:beta.index("}")]
+        #     return KnowledgeBase.unify(value, expression, theta=theta)
+        if f"{expression}/" in theta:
             beta: str = theta[theta.index(variable) + 2:]
             value: str = beta[:beta.index("}")]
             return KnowledgeBase.unify(variable, value, theta=theta)
@@ -170,4 +180,29 @@ class KnowledgeBase:
             return True
         return False
 
-
+    def generate_facts_from_senses(self, fact: Clause) -> None:
+        rules: List[Clause] = self.get_rules()
+        sentence: Sentence = fact.sentences[0]
+        for rule in rules:
+            if rule.sentences[0].name == sentence.name:
+                theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
+                if theta != "failure":
+                    print(f"theta: {theta}")
+                    sentences: List[Sentence] = []
+                    for i in range(1, len(rule)):
+                        args: List[str] = []
+                        for arg in rule.sentences[i].variables:
+                            beta: List[str] = theta.split(' ')
+                            beta = beta[:-1]
+                            print(f"beta: {beta}")
+                            for substring in beta:
+                                print(f"substring: {substring}")
+                                substring = substring.strip('{').strip('}')
+                                val: str = substring[:substring.index("/")]
+                                var: str = substring[substring.index("/") + 1:]
+                                print(f"val: {val}\nvar: {var}")
+                                if var in arg:
+                                    new_arg: str = arg.replace(var, val)
+                                    args.append(new_arg)
+                        sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
+                    self.append(Clause(sentences))
