@@ -5,9 +5,13 @@ from typing import Tuple
 
 from board import *
 
+# Abstract class representing an explorer. Has methods and attributes used by both rational and reactive explorer.
+# An explorer is initialized with the board it lives on. It also has quality-of-life output messages for debugging,
+# which are disabled by default.
 
 class Explorer:
 
+    # Initializes variables for explorer class.
     def __init__(self, board: Board, messages=False):
 
         self.actions_taken: int = 0
@@ -24,6 +28,7 @@ class Explorer:
         self.history = [self.location]
         return
 
+    # Gets a list of cells adjacent to the explorer, i.e. if explorer is in (x, y) returns (x+1, y), (x-1, y), etc.
     def get_adjacent_cells(self) -> List[List[int]]:
         x = self.location[0]
         y = self.location[1]
@@ -39,6 +44,10 @@ class Explorer:
             adjacent_cells.append([x, y + 1])
         return adjacent_cells
 
+    # Turns the explorer. The explorer has an enumerated attribute called facing,
+    # which corresponds to a cardinal direction.
+    # This method takes an enumerated value, called Direction, corresponding to left or right.
+    # This method has no return, and changes the facing of the explorer.
     def turn(self, direction: Direction) -> None:
         self.history.append('t')
         self.actions_taken += 1
@@ -64,6 +73,11 @@ class Explorer:
 
         return
 
+    # This method moves the explorer across the board. When called, there are two possibilities:
+    # 1) The explorer moves one cell in the direction it is facing. Returns true in this case.
+    # 2) The explorer attempts to walk off the board or into an obstacle. Returns false in this case.
+    # This method also resolves the result of walking: if the explorer walks into a cell with a wumpus or pit,
+    # the explorer dies. If the explorer walks into a cell with gold, the explorer grabs the gold.
     def walk(self) -> bool:
         self.history.append('w')
         self.actions_taken += 1
@@ -114,6 +128,9 @@ class Explorer:
             return True
         return False
 
+    # This method shoots an arrow in the direction the explorer is facing. The arrow movse in one direction through
+    # cells until it hits the edge of the board, an obstacle, or a wumpus. If the arrow hits a wumpus, the wumpus
+    # screams and dies. In this case the method returns True. Otherwise the method returns False.
     def shoot(self) -> bool:
         if self.arrows == 0:
             if self.display_messages:
@@ -150,8 +167,24 @@ class Explorer:
             print("The arrow disappears into the darkness.")
         return False
 
-    def observe(self):
-        sensations = self.board.get_observations(self.location)
+    # This method gains observations about adjacent cells. If any adjacent cell contains a wumpus, pit, or gold,
+    # then the explorer will observe a stench, breeze, or glimmer. These values are enumerated as Sensation.
+    # Returns a list of booleans; Sensation values correspond to the index of the boolean representing whether that
+    # Sensation was observed.
+    def observe(self) -> List[bool]:
+        adjacent_cells = self.get_adjacent_cells()
+
+        sensations: List[bool] = list(np.full(len(Sensation), False))
+        for adj in adjacent_cells:
+            x = adj[0]
+            y = adj[1]
+            if self.board.grid[x][y][CellContent.WUMPUS]:
+                sensations[Sensation.STENCH] = True
+            if self.board.grid[x][y][CellContent.PIT]:
+                sensations[Sensation.BREEZE] = True
+            if self.board.grid[x][y][CellContent.GOLD]:
+                sensations[Sensation.GLIMMER] = True
+
         if self.display_messages:
             if sensations[Sensation.STENCH]:
                 print("A terrible stench fills your nostrils.")
@@ -159,16 +192,21 @@ class Explorer:
                 print("A breeze ruffles your hair.")
             if sensations[Sensation.GLIMMER]:
                 print("You see a glimmer in the darkness.")
+
         return sensations
 
+    # This method kills the explorer. A dead explorer cannot act.
     def die(self) -> None:
         self.is_dead = True
         return
 
+    # This method picks up the gold. An explorer with gold cannot act.
     def escape(self) -> None:
         self.has_gold = True
         return
 
+    # This method displays the board and the explorer's position and facing. Does not display any value for any
+    # cell except the explorer's location.
     def disp(self):
         rows = []
         for i in range(self.board.size):
@@ -190,14 +228,24 @@ class Explorer:
         for row in rows:
             print(row)
 
+    # Abstract method implemented by child classes. This is the core method of the Explorer class, and how it chooses
+    # what to do at any given time.
     @abstractmethod
     def act(self) -> None:
         raise NotImplementedError
 
-    # METHODS USED FOR PATHFINDING THRU GRAPH REPRESENTING BOARD
+    # All following methods are used for pathfinding through the board.
 
-    # this method returns a list of vertices, 4 for each cell, which correspond to a cell and a facing.
-    # it also returns an adjacency matrix of strings.
+    # This method creates a directed graph corresponding to the explorer's movement about the board.
+    # It creates a list of vertices, 4 for each cell, which correspond to a cell and a facing.
+    # For example, the cell (1, 1) would correspond to four vertices:
+    # - (1, 1) North
+    # - (1, 1) East
+    # - (1, 1) South
+    # - (1, 1) West
+    # It also creates an adjacency matrix of strings representing what movements link the vertices.
+    # For example, (1, 1) North is connected to (1, 1) West by turning left, (1, 1) East by turning right, and
+    # (1, 2) North by walking.
     def generate_graph(self) -> None:
         # generate list of vertices
         V: List[Tuple[Tuple[int], Facing]] = []
@@ -265,7 +313,8 @@ class Explorer:
         self.G = (V, E)
         return
 
-    # breadth first search
+
+    # TODO description
     def path(self, target: Tuple[int]) -> List[str]:
         V, E = self.G
 
@@ -275,10 +324,19 @@ class Explorer:
             path = path[:-1]
         return path
 
+    # This method implements breadth first search through the graph representing the board.
+    # It takes as input a target cell. It then executes a breadth first search beginning at the explorer's current
+    # location and ending at the target location, building a list of predecessor vertices for each vertex.
+    # The search only allows movement through cells that are known to be safe or into the target cell.
+    # Upon finding a predecessor vertex for the target, a list consisting of 'w', 'l', and 'r' strings
+    # corresponding to walking and turning actions is assembled and returned.
+    # By default, this method searches for a path to the northward facing in the target cell, but eliminates excess
+    # turning actions at the end of the path before returning it.
     def breadth_first_search(self, target: Tuple[Tuple[int], Facing], E) -> List[str]:
         predecessors = {}
 
         s = (tuple(self.location), self.facing)
+
         queue = []
         queue.append(s)
 
@@ -287,9 +345,9 @@ class Explorer:
             for facing in Facing:
                 safe_cells_with_facings.append((tuple(cell), facing))
 
-
         while queue:
             s = queue.pop(0)
+
             if s == target:
                 path = []
                 step = s
@@ -308,3 +366,4 @@ class Explorer:
                             predecessors[edge[1]] = s
                             queue.append(edge[1])
         raise IOError("Unable to find a path.")
+        pass

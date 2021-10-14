@@ -20,3 +20,9 @@ class Sensation(IntEnum):
     STENCH: int = 0
     BREEZE: int = 1
     GLIMMER: int = 2
+
+class VisitState(IntEnum):
+    UNKNOWN = 0
+    VISITED = 1
+    SAFE_FRONTIER = 2
+    DANGEROUS_FRONTIER = 3

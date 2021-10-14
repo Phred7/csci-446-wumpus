@@ -3,84 +3,69 @@ from typing import Tuple
 from explorer import *
 from knowledge_base import *
 
-
+# Implementation of Explorer class which utilizes a knowledge base to make decisions.
 class RationalExplorer(Explorer):
 
     def __init__(self, board: Board):
         super().__init__(board)
-        self.safe_cells: List[List[int, int]] = []
-        self.safe_cells.append(self.location)
         self.frontier: List[List[int]] = []
         self.knowledge_base: KnowledgeBase = KnowledgeBase()
         self.init_knowledge_base()
 
-    def walk(self) -> bool:
-        bumped: bool = super().walk()
-        if bumped:
-            target_cell: List[int] = deepcopy(self.location)
-
-            if self.facing == Facing.NORTH:
-                target_cell[1] += 1
-            elif self.facing == Facing.EAST:
-                target_cell[0] += 1
-            elif self.facing == Facing.SOUTH:
-                target_cell[1] -= 1
-            elif self.facing == Facing.WEST:
-                target_cell[0] -= 1
-
-            bump_clause: Clause = Clause([Sentence("bump", "bu", literals=target_cell, negated=False)])
-            self.knowledge_base.append(bump_clause)
-        return bumped
-
+    # Core decision-making and executing method. Does the following:
+    # - ages, and if necessary, dies.
+    # - exits if explorer is dead or has gold.
+    # - makes observations about sensations from adjacent cells.
+    # - infers new facts from sensations.
+    # - does some bookkeeping:
+    # - - marks own location as safe
+    # - - removes own location from frontier
+    # - - adds new locations to frontier
+    # - assigns a danger rating to each cell on the frontier. Cells with definite dangers are infinitely dangerous,
+    #   cells with no dangers have zero danger, and cells with known gold have negative infinite danger.
+    #   TODO: DESCRIBE DANGER RATING PROCESS (MIGHT CHANGE)
+    # - chooses a target cell, which is the cell with lowest danger
+    # - finds a path to that cell
+    # - executes that path
+    # -
     def act(self) -> None:
         if self.actions_taken > 100:
             self.die()
-        #print()
-        #print("Acting.")
-        #print("Current location is", self.location, self.facing)
-        #print("Updating knowledge base.")
+
+        if self.is_dead or self.has_gold:
+            return
+
+        # make observations
         self.update_knowledge_base()
 
-        # TODO: TRY TO PROVE THINGS ABOUT FRONTIER CELLS? OR JUST DO RESOLUTION AND PROVE EVERYTHING WE CAN
-        #print("Performing resolution.\nSize of knowledge base before resolution:", len(self.knowledge_base.kb))
+        # observe new facts
         self.knowledge_base.infer()
-        #print("Size of knowledge base after resolution:", len(self.knowledge_base.kb))
 
-        #print("Marking my location as safe.")
         # the cell i'm in is safe
         if self.location not in self.safe_cells:
             self.safe_cells.append(self.location)
 
-        #print("Removing my location from frontier.")
         # the cell i'm in is not in the frontier
         if self.location in self.frontier:
             self.frontier.remove(self.location)
 
-        #print("Adding neighboring cells to frontier if appropriate.")
         # if adjacent cells weren't already in the frontier and aren't visited, add them
         for adjacent_cell in self.get_adjacent_cells():
             if adjacent_cell not in self.safe_cells and adjacent_cell not in self.frontier:
                 self.frontier.append(adjacent_cell)
 
-        #print("Frontier is now:")
-        #print(self.frontier)
-
-        #print("Assigning danger values to frontier.")
         # assign values to each frontier, create a queue of frontier cells in ascending order of danger
         queue: List[Tuple[List[int], float]]  = []
         for cell in self.frontier:
             queue.append((cell, self.assign_danger_value(cell)))
         queue.sort(key = lambda x : x[1], reverse=True)
 
-        #print("Danger levels in frontier cells:")
-        #print(queue)
 
-        #print("Pathing to safest frontier cell.")
+
         target = tuple(queue.pop()[0])
-        #print("Safest frontier cell is:", target)
+        print("Target is", target)
         path = self.path(target)
 
-        #print("Path to that cell is:", path)
         for step in path:
             if step == 'w':
                 self.walk()
@@ -92,8 +77,30 @@ class RationalExplorer(Explorer):
         #print("Ending action.")
         return
 
-    def update_knowledge_base(self):
-        sensations: List[Sensation] = self.observe()
+    # Modified implementation of parent class's walk method.
+    # Calls parent class's walk method, then if the walk was unsuccessful, adds a bump sensation to the knowledege base.
+    # Otherwise, adds a lack of bump sensation to the knowledge base.
+    def walk(self) -> bool:
+        bumped: bool = super().walk()
+        target_cell: List[int] = deepcopy(self.location)
+
+        if self.facing == Facing.NORTH:
+            target_cell[1] += 1
+        elif self.facing == Facing.EAST:
+            target_cell[0] += 1
+        elif self.facing == Facing.SOUTH:
+            target_cell[1] -= 1
+        elif self.facing == Facing.WEST:
+            target_cell[0] -= 1
+        bump_clause: Clause = Clause([Sentence("bump", "bu", literals=target_cell, negated=False)]) \
+            if bumped \
+            else Clause([Sentence("bump", "bu", literals=target_cell, negated=True)])
+        self.knowledge_base.append(bump_clause)
+        return bumped
+
+    # Calls parent class's observe method, then adds sensations or lack thereof to the knowledge base.
+    def update_knowledge_base(self) -> None:
+        sensations: List[bool] = self.observe()
 
         # bleh ternary statements
 
@@ -101,11 +108,9 @@ class RationalExplorer(Explorer):
             if sensations[Sensation.STENCH] \
             else Sentence('stench', 's', literals = self.location, negated=True)
 
-
         breeze_sentence: Sentence = Sentence('breeze', 'b', literals=self.location, negated=False) \
             if sensations[Sensation.BREEZE] \
             else Sentence('breeze', 'b', literals=self.location, negated=True)
-
 
         glimmer_sentence: Sentence =  Sentence('glimmer', 'gl', literals = self.location, negated=False) \
             if sensations[Sensation.GLIMMER] \
@@ -176,6 +181,7 @@ class RationalExplorer(Explorer):
 
         self.knowledge_base.set_rules([rule1, rule2, rule3, rule4])
 
+    # TODO: MAKE GOOD
     def assign_danger_value(self, coords) -> float:
         wumpus_danger: float = 0
         wumpus_safe_sentence: Sentence = Sentence("wumpus", "w", literals=coords, negated=True)

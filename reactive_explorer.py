@@ -1,16 +1,9 @@
 import numpy
 
-import board
-from typing import List
-
 from explorer import *
 
 
-class VisitState(Enum):
-    UNKNOWN = 0
-    VISITED = 1
-    SAFE_FRONTIER = 2
-    DANGEROUS_FRONTIER = 3
+
 
 
 class ReactiveExplorer(Explorer):
@@ -25,16 +18,11 @@ class ReactiveExplorer(Explorer):
         x = self.location[0]
         y = self.location[1]
 
-        if self.board.grid[x, y][CellContent.GOLD]:
-            self.has_gold = True
-            return
-
-        if self.age > 10000 or self.board.grid[x, y][CellContent.WUMPUS] or self.board.grid[x, y][CellContent.PIT]:
+        if self.actions_taken > 10000:
             self.die()
-            return
-        self.age += 1
 
         self.visit_map[x][y] = VisitState.VISITED
+        self.safe_cells.append(self.location)
 
         adjacent_cells = self.get_adjacent_cells()
 
@@ -48,16 +36,31 @@ class ReactiveExplorer(Explorer):
                 else:
                     self.visit_map[i, j] = VisitState.SAFE_FRONTIER
 
+        target: Tuple[int, int] = None
         for i in range(len(self.visit_map)):
             for j in range(len(self.visit_map)):
                 if self.visit_map[i, j] == VisitState.SAFE_FRONTIER:
-                    self.path([i, j])
-                    return
+                    if target == None:
+                        target = (i, j)
+
         for i in range(len(self.visit_map)):
             for j in range(len(self.visit_map)):
                 if self.visit_map[i, j] == VisitState.DANGEROUS_FRONTIER:
-                    self.path([i, j])
-                    return
+                    if target == None:
+                        target = (i, j)
+
+        print('target is', target)
+        path = self.path(target)
+        print('path is', path)
+
+        for step in path:
+            if step == 'w':
+                self.walk()
+            elif step == 'l':
+                self.turn(Direction.LEFT)
+            elif step == 'r':
+                self.turn(Direction.RIGHT)
+
 
     def disp(self):
         rows = []
