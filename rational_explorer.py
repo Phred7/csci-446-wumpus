@@ -98,6 +98,22 @@ class RationalExplorer(Explorer):
         self.knowledge_base.append(bump_clause)
         return bumped
 
+    def shoot(self) -> None:
+        heard_scream = super().shoot()
+        if heard_scream:
+            scream_clause: Clause = Clause([Sentence("scream", "sc", literals=[self.location[0],
+                                                                               self.location[1],
+                                                                               self.facing],
+                                                     negated=False)])
+            self.knowledge_base.append(scream_clause)
+        else:
+            no_scream_clause: Clause = Clause([Sentence("scream", "sc", literals=[self.location[0],
+                                                                               self.location[1],
+                                                                               self.facing],
+                                                     negated=True)])
+            self.knowledge_base.append(no_scream_clause)
+        return
+
     # Calls parent class's observe method, then adds sensations or lack thereof to the knowledge base.
     def update_knowledge_base(self) -> None:
         sensations: List[bool] = self.observe()
@@ -129,32 +145,34 @@ class RationalExplorer(Explorer):
             bu = bump, o = obstacle, (x,y) is coordinate on the board
         '''
 
+        rules: List[Clause] = []
+        facts: List[Clause] = []
 
         '''
         Rule 1
         (Smell implies wumpus is in adjacent cell) converted to clause form is
         ~s(x,y) | [w(x+1, y) | w(x-1, y) | w(x, y+1) | w(x, y-1)]
         '''
+        rule1: Clause = Clause([Sentence("stench", "s", variables = ["x", "y"], negated = True),
+                                Sentence("wumpus", "w", variables=["x+1", 'y']),
+                                Sentence("wumpus", "w", variables=["x-1", 'y']),
+                                Sentence("wumpus", "w", variables=["x", 'y+1']),
+                                Sentence("wumpus", "w", variables=["x", 'y-1'])])
 
-        r1_s1: Sentence = Sentence("stench", "s", variables = ["x", "y"], negated = True)
-        r1_s2: Sentence = Sentence("wumpus", "w", variables = ["x+1", 'y'])
-        r1_s3: Sentence = Sentence("wumpus", "w", variables=["x-1", 'y'])
-        r1_s4: Sentence = Sentence("wumpus", "w", variables=["x", 'y+1'])
-        r1_s5: Sentence = Sentence("wumpus", "w", variables=["x", 'y-1'])
-        rule1: Clause = Clause([r1_s1, r1_s2, r1_s3, r1_s4, r1_s5])
+        rules.append(rule1)
 
         '''
         Rule 2
         (Breeze implies pit in adjacent cell) converted to clause form is
         ~b(x,y) | [p(x+1, y) | p(x-1, y) | p(x, y+1) | p(x, y-1)]
         '''
+        rule2: Clause = Clause([Sentence("breeze", "b", variables=["x", "y"], negated=True),
+                                Sentence("pit", "p", variables=["x+1", 'y']),
+                                Sentence("pit", "p", variables=["x-1", 'y']),
+                                Sentence("pit", "p", variables=["x", 'y+1']),
+                                Sentence("pit", "p", variables=["x", 'y-1'])])
 
-        r2_s1: Sentence = Sentence("breeze", "b", variables=["x", "y"], negated=True)
-        r2_s2: Sentence = Sentence("pit", "p", variables=["x+1", 'y'])
-        r2_s3: Sentence = Sentence("pit", "p", variables=["x-1", 'y'])
-        r2_s4: Sentence = Sentence("pit", "p", variables=["x", 'y+1'])
-        r2_s5: Sentence = Sentence("pit", "p", variables=["x", 'y-1'])
-        rule2: Clause = Clause([r2_s1, r2_s2, r2_s3, r2_s4, r2_s5])
+        rules.append(rule2)
 
         """
         Rule 3
@@ -162,12 +180,14 @@ class RationalExplorer(Explorer):
         ~gl(x,y) | [g(x+1, y) | g(x-1, y) | g(x, y+1) | g(x, y-1)]
         """
 
-        r3_s1: Sentence = Sentence("glimmer", "gl", variables=["x", "y"], negated=True)
-        r3_s2: Sentence = Sentence("gold", "g", variables=["x+1", 'y'])
-        r3_s3: Sentence = Sentence("gold", "g", variables=["x-1", 'y'])
-        r3_s4: Sentence = Sentence("gold", "g", variables=["x", 'y+1'])
-        r3_s5: Sentence = Sentence("gold", "g", variables=["x", 'y-1'])
-        rule3: Clause = Clause([r3_s1, r3_s2, r3_s3, r3_s4, r3_s5])
+        rule3: Clause = Clause([Sentence("glimmer", "gl", variables=["x", "y"], negated=True),
+                                Sentence("gold", "g", variables=["x+1", 'y']),
+                                Sentence("gold", "g", variables=["x-1", 'y']),
+                                Sentence("gold", "g", variables=["x", 'y+1']),
+                                Sentence("gold", "g", variables=["x", 'y-1'])])
+
+        rules.append(rule3)
+
 
         '''
         Rule 4
@@ -175,11 +195,200 @@ class RationalExplorer(Explorer):
         ~bu(x,y) | o(x,y)
         '''
 
-        r4_s1: Sentence = Sentence("bump", "bu", variables = ["x", "y"], negated = True)
-        r4_s2: Sentence = Sentence("obstacle", "o", variables = ["x", "y"])
-        rule4: Clause = Clause([r4_s1, r4_s2])
+        rule4: Clause = Clause([Sentence("bump", "bu", variables = ["x", "y"], negated = True),
+                                Sentence("obstacle", "o", variables = ["x", "y"])])
 
-        self.knowledge_base.set_rules([rule1, rule2, rule3, rule4])
+        rules.append(rule4)
+
+
+        """
+        Rule 5
+        (wumpus implies no pit)
+        ~w(x, y) | ~p(x, y)
+        """
+
+        rule5: Clause = Clause([Sentence("wumpus", "w", variables=["x", "y"], negated=True),
+                                Sentence("pit", "p", variables=["x", "y"], negated=True)])
+
+        rules.append(rule5)
+
+        """
+        Rule 6
+        (wumpus implies no gold)
+        ~w(x, y) | ~g(x, y)
+        """
+
+        rule6: Clause = Clause([Sentence("wumpus", "w", variables=["x", "y"], negated=True),
+                                Sentence("gold", "g", variables=["x", "y"], negated=True)])
+
+        rules.append(rule6)
+
+        """
+        Rule 7
+        (pit implies no wumpus)
+        ~p(x, y) | ~w(x, y)
+        """
+
+        rule7: Clause = Clause([Sentence("wumpus", "w", variables=["x", "y"], negated=True),
+                                Sentence("pit", "p", variables=["x", "y"], negated=True)])
+
+        rules.append(rule7)
+
+        """
+        Rule 8
+        (pit implies no gold)
+        ~p(x, y) | ~g(x, y)
+        """
+        rule8: Clause = Clause([Sentence("gold", "g", variables=["x", "y"], negated=True),
+                                Sentence("pit", "p", variables=["x", "y"], negated=True)])
+
+        rules.append(rule8)
+
+        """
+        Rule 9
+        (pit implies no obstacle)
+        ~p(x, y) | ~o(x, y)
+        """
+
+        rule9: Clause = Clause([Sentence("obstacle", "o", variables=["x", "y"], negated=True),
+                                Sentence("pit", "p", variables=["x", "y"], negated=True)])
+
+        rules.append(rule9)
+
+        """
+        Rule 10
+        (gold implies no obstacle)
+        ~g(x, y) | ~o(x, y)
+        """
+
+        rule10: Clause = Clause([Sentence("obstacle", "o", variables=["x", "y"], negated=True),
+                                 Sentence("gold", "g", variables=["x", "y"], negated=True)])
+
+        rules.append(rule10)
+
+        """
+        Rule 11
+        (no scream north implies no wumpus north)
+        sc(x, y, 0) | ~w(x, y+1)
+        """
+        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
+        rule11: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "0"], negated=False),
+                                 Sentence("wumpus", "w", variables=["x", "y+1"], negated=True)])
+
+        rules.append(rule11)
+
+        """
+        Rule 12
+        (no scream east implies no wumpus east)
+        sc(x, y, 1) | ~w(x+1, y)
+        """
+        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
+        rule12: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "1"], negated=False),
+                                 Sentence("wumpus", "w", variables=["x+1", "y"], negated=True)])
+
+        rules.append(rule12)
+
+        """
+        Rule 13
+        (no scream south implies no wumpus south)
+        sc(x, y, 2) | ~w(x, y-1)
+        """
+        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
+        rule13: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "2"], negated=False),
+                                 Sentence("wumpus", "w", variables=["x", "y-1"], negated=True)])
+
+        rules.append(rule13)
+
+        """
+        Rule 14
+        (no scream east implies no wumpus east)
+        sc(x, y, 3) | ~w(x-1, y)
+        """
+        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
+        rule14: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "3"], negated=False),
+                                 Sentence("wumpus", "w", variables=["x-1", "y"], negated=True)])
+
+        rules.append(rule14)
+
+        """
+        Rule 15
+        Scream to the north implies wumpus to the north. Depends on how many cells there are.
+        These rules are generated algorithmically based on the size of the board.
+        Example on a board of size 4, facing north:
+        ~sc(x, 0, 0) | w(x, 1) | w(x, 2) | w(x, 3) | w(x, 4)
+        ~sc(x, 1, 0) | w(x, 2) | w(x, 3) | w(x, 4)
+        ~sc(x, 2, 0) | w(x, 3) | w(x, 4)
+        ~sc(x, 3, 0) | w(x, 4)
+        """
+        for facing in Facing:
+
+            if facing == Facing.NORTH:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", offset-1, "0"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=["x", offset + i])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.EAST:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=[offset-1, "y", "1"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=[ offset + i, "y"])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.SOUTH:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", 4 - (offset-1), "2"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=["x", 4 - (offset + i)])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.WEST:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=[4 - (offset-1), "y", "3"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=[4 - (offset + i), "y"])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+
+
+
+        self.knowledge_base.set_rules(rules)
+
+        """
+        Rule 16
+        There are no wumpuses, pits, or golds immediately off the board. There are obstacles immediately off the board.
+        These facts are useful for generation of facts based off of sensations, allowing the inference engine to
+        eliminate some possibilities immediately.
+        """
+        content_types = [["wumpus", "w", True], ["pit", "p", True], ["gold", "g", True], ["obstacle", "o", False]]
+        for content_type in content_types:
+            for i in range(self.board.size):
+                for j in [-1, self.board.size]:
+                    vertical_clause: Clause = Clause([Sentence(content_type[0], content_type[1], literals=[i, j], negated=content_type[2])])
+                    horizontal_clause: Clause = Clause([Sentence(content_type[0], content_type[1], literals=[j, i], negated=content_type[2])])
+                    self.knowledge_base.append(vertical_clause)
+                    self.knowledge_base.append(horizontal_clause)
 
     # TODO: MAKE GOOD
     def assign_danger_value(self, coords) -> float:
