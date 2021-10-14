@@ -62,6 +62,13 @@ class KnowledgeBase:
                 rules.append(clause)
         return rules
 
+    def get_facts(self) -> List[Clause]:
+        facts: List[Clause] = []
+        for clause in self.kb:
+            if not clause.rule:
+                facts.append(clause)
+        return facts
+
     def infer(self) -> None:
         pass
 
