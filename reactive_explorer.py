@@ -27,6 +27,20 @@ class ReactiveExplorer(Explorer):
         adjacent_cells = self.get_adjacent_cells()
 
         sensations = self.observe()
+        if sensations[Sensation.STENCH]:
+            if self.arrows > 0:
+                scream = self.shoot()
+                if scream:
+                    if self.facing == Facing.NORTH:
+                        self.visit_map[self.location[0]][self.location[1] + 1] = VisitState.SAFE_FRONTIER
+                    elif self.facing == Facing.EAST:
+                        self.visit_map[self.location[0] + 1][self.location[1]] = VisitState.SAFE_FRONTIER
+                    elif self.facing == Facing.SOUTH:
+                        self.visit_map[self.location[0]][self.location[1] - 1] = VisitState.SAFE_FRONTIER
+                    elif self.facing == Facing.WEST:
+                        self.visit_map[self.location[0] - 1][self.location[1]] = VisitState.SAFE_FRONTIER
+
+
 
         for i, j in adjacent_cells:
             if not self.visit_map[i, j] == VisitState.VISITED \
