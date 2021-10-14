@@ -53,32 +53,6 @@ class Board:
         self.grid[coords[0]][coords[1]][CellContent.WUMPUS] = True
         self.wumpus_count += 1
 
-    # TODO: IDK HOW TO DO A RETURN SIGNATURE FOR AN ARRAY
-    def get_observations(self, coords):
-        adjacent_cells = []
-        x = coords[0]
-        y = coords[1]
-
-        if x > 0:
-            adjacent_cells.append([x - 1, y])
-        if y > 0:
-            adjacent_cells.append([x, y - 1])
-        if x < self.size - 1:
-            adjacent_cells.append([x + 1, y])
-        if y < self.size - 1:
-            adjacent_cells.append([x, y + 1])
-
-        sensations = np.full(len(Sensation), False)
-        for adj in adjacent_cells:
-            if self.grid[adj[0]][adj[1]][CellContent.WUMPUS]:
-                sensations[Sensation.STENCH] = True
-            if self.grid[adj[0]][adj[1]][CellContent.PIT]:
-                sensations[Sensation.BREEZE] = True
-            if self.grid[adj[0]][adj[1]][CellContent.GOLD]:
-                sensations[Sensation.GLIMMER] = True
-        return sensations
-
-    # TODO: EITHER THIS OR
     def disp(self):
         rows = []
         for i in range(self.size):
@@ -90,6 +64,8 @@ class Board:
                     string += "W|"
                 elif self.grid[j][i][CellContent.PIT]:
                     string += "P|"
+                elif self.grid[j][i][CellContent.OBSTACLE]:
+                    string += "O|"
                 else:
                     string += "_|"
             rows.append(string)
