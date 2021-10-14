@@ -64,6 +64,8 @@ class Board:
                     string += "W|"
                 elif self.grid[j][i][CellContent.PIT]:
                     string += "P|"
+                elif self.grid[j][i][CellContent.OBSTACLE]:
+                    string += "O|"
                 else:
                     string += "_|"
             rows.append(string)

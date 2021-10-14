@@ -96,7 +96,6 @@ class Explorer:
         if target_cell[0] < 0 \
                 or target_cell[1] < 0 \
                 or target_cell[0] > self.board.size - 1 \
-                or target_cell[0] > self.board.size - 1 \
                 or target_cell[1] > self.board.size - 1 \
                 or self.board.grid[target_cell[0]][target_cell[1]][CellContent.OBSTACLE]:
             hit_something = True
@@ -104,6 +103,7 @@ class Explorer:
         if hit_something:
             if self.display_messages:
                 print("You have bumped into something.")
+            return False
         else:
             self.location = target_cell
 
@@ -320,6 +320,8 @@ class Explorer:
 
         # we path to the node representing facing north in the target cell, then remove any excess turns
         path = self.breadth_first_search((target, Facing.NORTH), E)
+        if len(path) == 0:
+            return path
         while path[-1] != 'w':
             path = path[:-1]
         return path
@@ -365,5 +367,8 @@ class Explorer:
                         and (edge[1] in safe_cells_with_facings or edge[1][0] == target[0]):
                             predecessors[edge[1]] = s
                             queue.append(edge[1])
+        self.disp()
+        self.board.disp()
+        print(target[0])
         raise IOError("Unable to find a path.")
         pass

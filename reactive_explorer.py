@@ -18,7 +18,7 @@ class ReactiveExplorer(Explorer):
         x = self.location[0]
         y = self.location[1]
 
-        if self.actions_taken > 10000:
+        if self.actions_taken > 500:
             self.die()
 
         self.visit_map[x][y] = VisitState.VISITED
@@ -30,11 +30,14 @@ class ReactiveExplorer(Explorer):
 
         for i, j in adjacent_cells:
             if not self.visit_map[i, j] == VisitState.VISITED \
-                    and not self.visit_map[i, j] == VisitState.SAFE_FRONTIER:
+                    and not self.visit_map[i, j] == VisitState.SAFE_FRONTIER\
+                    and not self.visit_map[i, j] == VisitState.IMPASSABLE:
                 if sensations[Sensation.STENCH] or sensations[Sensation.BREEZE]:
                     self.visit_map[i, j] = VisitState.DANGEROUS_FRONTIER
                 else:
                     self.visit_map[i, j] = VisitState.SAFE_FRONTIER
+
+        # self.disp()
 
         target: Tuple[int, int] = None
         for i in range(len(self.visit_map)):
@@ -48,14 +51,16 @@ class ReactiveExplorer(Explorer):
                 if self.visit_map[i, j] == VisitState.DANGEROUS_FRONTIER:
                     if target == None:
                         target = (i, j)
-
-        print('target is', target)
+        if target == None:
+            self.die()
+            return
         path = self.path(target)
-        print('path is', path)
 
         for step in path:
             if step == 'w':
-                self.walk()
+                successfully_walked = self.walk()
+                if not successfully_walked:
+                    self.visit_map[target[0]][target[1]] = VisitState.IMPASSABLE
             elif step == 'l':
                 self.turn(Direction.LEFT)
             elif step == 'r':
@@ -86,6 +91,8 @@ class ReactiveExplorer(Explorer):
                         string += "D|"
                     elif state == VisitState.UNKNOWN:
                         string += "_|"
+                    elif state == VisitState.IMPASSABLE:
+                        string += "I|"
             rows.append(string)
         rows.reverse()
         for row in rows:
