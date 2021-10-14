@@ -18,7 +18,6 @@ def explore(explorer: RationalExplorer) -> int:
 
 
 if __name__ == '__main__':
-
     # Threading:
     # board_sizes: List[int] = [5, 10, 15, 20, 25]
     #
@@ -40,14 +39,14 @@ if __name__ == '__main__':
 
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
-    # sentence: Sentence = Sentence("foo", "f", variables=["x"])
+    # sentence: Sentence = Sentence("foo", "f", variables=["x+1"])
     # clause: Clause = Clause([sentence])
-    # sentence_2: Sentence = Sentence("foo", "f", variables=["a"])
+    # sentence_2: Sentence = Sentence("foo", "f", literals=[0])
     # clause_2: Clause = Clause([sentence_2])
     # knowledge_base.set_rules([clause, clause_2])
     # print(knowledge_base)
     # print(f"unified: {knowledge_base.unify(knowledge_base.get_clause(0), knowledge_base.get_clause(1))}\n")
-    #
+
     # Example Unification 2:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
     # sentence: Sentence = Sentence("foo", "f", variables=["x", "y"])
@@ -77,8 +76,37 @@ if __name__ == '__main__':
     board: Board = Board(size=5)
     board.generate_board()
     rational: RationalExplorer = RationalExplorer(board)
-    print(rational.knowledge_base)
+    rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
     print(f"{rational.board.__class__.__name__}:\n{rational.board}")
+    print(rational.knowledge_base)
+    rules: List[Clause] = rational.knowledge_base.get_rules()
+    sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
+    for rule in rules:
+        if rule.sentences[0].name == sentence.name:
+            theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
+            if theta != "failure":
+                print(f"theta: {theta}")
+                sentences: List[Sentence] = []
+                for i in range(1, len(rule)):
+                    args: List[str] = []
+                    for arg in rule.sentences[i].variables:
+                        beta: List[str] = theta.split(' ')
+                        beta = beta[:-1]
+                        print(f"beta: {beta}")
+                        for substring in beta:
+                            print(f"substring: {substring}")
+                            substring = substring.strip('{').strip('}')
+                            val: str = substring[:substring.index("/")]
+                            var: str = substring[substring.index("/")+1:]
+                            print(f"val: {val}\nvar: {var}")
+                            if var in arg:
+                                new_arg: str = arg.replace(var, val)
+                                args.append(new_arg)
+                    sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
+                rational.knowledge_base.append(Clause(sentences))
+    print(rational.knowledge_base)
+
+
 
     # Example KB:
     # kb: KnowledgeBase = KnowledgeBase()
