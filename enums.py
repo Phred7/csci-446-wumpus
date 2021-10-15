@@ -25,3 +25,4 @@ class VisitState(IntEnum):
     UNKNOWN = 0
     VISITED = 1
     FRONTIER = 2
+    IMPASSABLE = 3
