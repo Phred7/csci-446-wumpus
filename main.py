@@ -79,32 +79,33 @@ if __name__ == '__main__':
     rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[1, 1], negated=False)]))
     print(f"{rational.board.__class__.__name__}:\n{rational.board}")
     print(rational.knowledge_base)
-    #rational.knowledge_base.infer()
-    # rules: List[Clause] = rational.knowledge_base.get_rules()
-    # sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
-    # for rule in rules:
-    #     if rule.sentences[0].name == sentence.name:
-    #         theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
-    #         if theta != "failure":
-    #             print(f"theta: {theta}")
-    #             sentences: List[Sentence] = []
-    #             for i in range(1, len(rule)):
-    #                 args: List[str] = []
-    #                 for arg in rule.sentences[i].variables:
-    #                     beta: List[str] = theta.split(' ')
-    #                     beta = beta[:-1]
-    #                     print(f"beta: {beta}")
-    #                     for substring in beta:
-    #                         print(f"substring: {substring}")
-    #                         substring = substring.strip('{').strip('}')
-    #                         val: str = substring[:substring.index("/")]
-    #                         var: str = substring[substring.index("/")+1:]
-    #                         print(f"val: {val}\nvar: {var}")
-    #                         if var in arg:
-    #                             new_arg: str = arg.replace(var, val)
-    #                             args.append(new_arg)
-    #                 sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
-    #             rational.knowledge_base.append(Clause(sentences))
+    rational.knowledge_base.infer()
+    rules: List[Clause] = rational.knowledge_base.get_rules()
+    sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
+    for rule in rules:
+        if rule.sentences[0].name == sentence.name:
+            print("sentence:", sentence)
+            theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
+            if theta != "failure":
+                print(f"theta: {theta}")
+                sentences: List[Sentence] = []
+                for i in range(1, len(rule)):
+                    args: List[str] = []
+                    for arg in rule.sentences[i].variables:
+                        beta: List[str] = theta.split(' ')
+                        beta = beta[:-1]
+                        print(f"beta: {beta}")
+                        for substring in beta:
+                            print(f"substring: {substring}")
+                            substring = substring.strip('{').strip('}')
+                            val: str = substring[:substring.index("/")]
+                            var: str = substring[substring.index("/")+1:]
+                            print(f"val: {val}\nvar: {var}")
+                            if var in arg:
+                                new_arg: str = arg.replace(var, val)
+                                args.append(new_arg)
+                    sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
+                rational.knowledge_base.append(Clause(sentences))
     print(rational.knowledge_base)
 
 

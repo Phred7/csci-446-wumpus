@@ -11,14 +11,14 @@ class ReactiveExplorer(Explorer):
     def __init__(self, _board: Board):
         super().__init__(_board)
         self.visit_map = numpy.full((_board.size, _board.size), 0)
-        self.age = 0
+        self.max_age = 500
         super().__init__(_board, False)
 
     def act(self) -> None:
         x = self.location[0]
         y = self.location[1]
 
-        if self.actions_taken > 500:
+        if self.actions_taken > self.max_age:
             self.die()
 
         self.visit_map[x][y] = VisitState.VISITED
@@ -27,18 +27,18 @@ class ReactiveExplorer(Explorer):
         adjacent_cells = self.get_adjacent_cells()
 
         sensations = self.observe()
-        if sensations[Sensation.STENCH]:
-            if self.arrows > 0:
-                scream = self.shoot()
-                if scream:
-                    if self.facing == Facing.NORTH:
-                        self.visit_map[self.location[0]][self.location[1] + 1] = VisitState.SAFE_FRONTIER
-                    elif self.facing == Facing.EAST:
-                        self.visit_map[self.location[0] + 1][self.location[1]] = VisitState.SAFE_FRONTIER
-                    elif self.facing == Facing.SOUTH:
-                        self.visit_map[self.location[0]][self.location[1] - 1] = VisitState.SAFE_FRONTIER
-                    elif self.facing == Facing.WEST:
-                        self.visit_map[self.location[0] - 1][self.location[1]] = VisitState.SAFE_FRONTIER
+        # if sensations[Sensation.STENCH]:
+        #     if self.arrows > 0:
+        #         scream = self.shoot()
+        #         if scream:
+        #             if self.facing == Facing.NORTH:
+        #                 self.visit_map[self.location[0]][self.location[1] + 1] = VisitState.SAFE_FRONTIER
+        #             elif self.facing == Facing.EAST:
+        #                 self.visit_map[self.location[0] + 1][self.location[1]] = VisitState.SAFE_FRONTIER
+        #             elif self.facing == Facing.SOUTH:
+        #                 self.visit_map[self.location[0]][self.location[1] - 1] = VisitState.SAFE_FRONTIER
+        #             elif self.facing == Facing.WEST:
+        #                 self.visit_map[self.location[0] - 1][self.location[1]] = VisitState.SAFE_FRONTIER
 
 
 
@@ -48,12 +48,21 @@ class ReactiveExplorer(Explorer):
                     and not self.visit_map[i, j] == VisitState.IMPASSABLE:
                 if sensations[Sensation.STENCH] or sensations[Sensation.BREEZE]:
                     self.visit_map[i, j] = VisitState.DANGEROUS_FRONTIER
+                elif sensations[Sensation.GLIMMER]:
+                    self.visit_map[i, j] = VisitState.ATTRACTIVE_FRONTIER
                 else:
                     self.visit_map[i, j] = VisitState.SAFE_FRONTIER
 
         # self.disp()
 
+
         target: Tuple[int, int] = None
+        for i in range(len(self.visit_map)):
+            for j in range(len(self.visit_map)):
+                if self.visit_map[i, j] == VisitState.ATTRACTIVE_FRONTIER:
+                    if target == None:
+                        target = (i, j)
+
         for i in range(len(self.visit_map)):
             for j in range(len(self.visit_map)):
                 if self.visit_map[i, j] == VisitState.SAFE_FRONTIER:
@@ -107,6 +116,8 @@ class ReactiveExplorer(Explorer):
                         string += "_|"
                     elif state == VisitState.IMPASSABLE:
                         string += "I|"
+                    elif state == VisitState.ATTRACTIVE_FRONTIER:
+                        string += "A|"
             rows.append(string)
         rows.reverse()
         for row in rows:

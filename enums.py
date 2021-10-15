@@ -27,3 +27,4 @@ class VisitState(IntEnum):
     SAFE_FRONTIER = 2
     DANGEROUS_FRONTIER = 3
     IMPASSABLE = 4
+    ATTRACTIVE_FRONTIER = 5
