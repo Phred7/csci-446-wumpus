@@ -24,6 +24,7 @@ class KnowledgeBase:
         for rule in rules:
             rule.set_kb_id(self.clauses)
             rule.set_rule()
+            rule.new = False
             self.kb.append(rule)
             self.clauses += 1
         self.kb_init = True

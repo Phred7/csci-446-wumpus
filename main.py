@@ -105,6 +105,7 @@ if __name__ == '__main__':
     #                             args.append(new_arg)
     #                 sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
     #             rational.knowledge_base.append(Clause(sentences))
+    rational.knowledge_base.infer()
     print(rational.knowledge_base)
 
 

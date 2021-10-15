@@ -25,10 +25,14 @@ class Clause:
         """
         if self.string == "":
             string: str = ""
+            if self.negated:
+                string += "~("
             for arg in self.sentences:
                 string += f"{str(arg)}"
                 if self.sentences.index(arg) != len(self.sentences) - 1:
                     string += f" {self.operator} "
+            if self.negated:
+                string += ")"
             self.string = deepcopy(string)
         return self.string
 
@@ -46,3 +50,4 @@ class Clause:
 
     def negate(self) -> None:
         self.negated = False if self.negated else True
+        self.string = ""
