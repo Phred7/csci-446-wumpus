@@ -4,11 +4,13 @@ from sentence import *
 
 class KnowledgeBase:
 
-    def __init__(self) -> None:
+    def __init__(self, n: int) -> None:
         self.kb: List[Clause] = []
         self.clauses: int = 0
         self.string: str = ""
         self.kb_init: bool = False
+        self.new_clauses_are_new: bool = False
+        self._n = n
 
     def __str__(self) -> str:  # TODO anytime a KB is modified self.string MUST be set to ""
         if self.string == "":
@@ -33,6 +35,8 @@ class KnowledgeBase:
         if self.kb_init is False:
             raise IOError("Knowledge Base has not been initialized. Call set_rules() to initialize this KB.")
         item.set_kb_id(self.clauses)
+        if self.new_clauses_are_new:
+            item.new = True
         self.string = ""
         self.clauses += 1
         self.kb.append(item)
@@ -71,13 +75,13 @@ class KnowledgeBase:
 
     def get_new_facts(self) -> List[Clause]:
         new_facts: List[Clause] = []
-        for clause in self.get_rules():
+        for clause in self.get_facts():
             if clause.new:
                 new_facts.append(clause)
         return new_facts
 
     def infer(self) -> None:
-        new_facts: List[Clause] = self.get_new_facts()
+        new_facts: List[Clause] = deepcopy(self.get_new_facts())
         for fact in new_facts:
             self.generate_facts_from_senses(fact)
             fact.new = False
@@ -188,22 +192,39 @@ class KnowledgeBase:
             if rule.sentences[0].name == sentence.name:
                 theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
                 if theta != "failure":
-                    print(f"theta: {theta}")
+                    # print(f"theta: {theta}")
                     sentences: List[Sentence] = []
                     for i in range(1, len(rule)):
                         args: List[str] = []
                         for arg in rule.sentences[i].variables:
                             beta: List[str] = theta.split(' ')
                             beta = beta[:-1]
-                            print(f"beta: {beta}")
+                            # print(f"beta: {beta}")
                             for substring in beta:
-                                print(f"substring: {substring}")
+                                # print(f"substring: {substring}")
                                 substring = substring.strip('{').strip('}')
                                 val: str = substring[:substring.index("/")]
                                 var: str = substring[substring.index("/") + 1:]
-                                print(f"val: {val}\nvar: {var}")
+                                # print(f"val: {val}\nvar: {var}")
                                 if var in arg:
                                     new_arg: str = arg.replace(var, val)
                                     args.append(new_arg)
                         sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
+
+                    remove: List[int] = []
+
+                    for new_sentence in sentences:
+                        new_sentence.string = ""
+                        invalid: bool = False
+                        str(new_sentence)
+                        for arg in new_sentence.arguments:
+                            arg = str(eval(arg)) if '-' in arg or '+' in arg else arg
+                            if '-' in arg or arg.isdigit():
+                                if int(arg) < 0 or int(arg) >= self._n:
+                                    invalid = True
+                        if invalid:
+                            remove.append(sentences.index(new_sentence))
+                    remove.reverse()
+                    for rem in remove:
+                        sentences.pop(rem)
                     self.append(Clause(sentences))

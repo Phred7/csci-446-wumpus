@@ -16,7 +16,7 @@ class Clause:
         self.string: str = ""
         self.kb_id: int = -1
         self.rule: bool = False
-        self.new: bool = True
+        self.new: bool = False
 
     def __str__(self) -> str:  # TODO anytime a clause is modified self.string MUST be set to ""
         """

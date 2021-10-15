@@ -76,7 +76,7 @@ if __name__ == '__main__':
     board: Board = Board(size=5)
     board.generate_board()
     rational: RationalExplorer = RationalExplorer(board)
-    rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[1, 1], negated=False)]))
+    rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 4], negated=False)]))
     print(f"{rational.board.__class__.__name__}:\n{rational.board}")
     print(rational.knowledge_base)
     #rational.knowledge_base.infer()
