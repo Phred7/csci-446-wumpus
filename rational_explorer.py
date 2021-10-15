@@ -392,43 +392,62 @@ class RationalExplorer(Explorer):
 
     # TODO: MAKE GOOD
     def assign_danger_value(self, coords) -> float:
+
         wumpus_danger: float = 0
         wumpus_safe_sentence: Sentence = Sentence("wumpus", "w", literals=coords, negated=True)
         wumpus_danger_sentence: Sentence = Sentence("wumpus", "w", literals=coords, negated=False)
 
+        shortest_wumpus_clause_len: float = float('inf')
         for clause in self.knowledge_base.kb:
+            if str(clause) == str(wumpus_safe_sentence):
+                break
             for sentence in clause.sentences:
-                if str(wumpus_safe_sentence) == str(sentence):
-                    wumpus_danger = 0
-                    break
-                elif str(wumpus_danger_sentence) == str(sentence):
-                    wumpus_danger += 1 / len(clause)
+                if str(sentence) == str(wumpus_danger_sentence):
+                    if len(clause) < shortest_wumpus_clause_len:
+                        shortest_wumpus_clause_len = len(clause)
+
+        if shortest_wumpus_clause_len == 1:
+            wumpus_danger = float('inf')
+        else:
+            wumpus_danger = 1 / shortest_wumpus_clause_len
 
         pit_danger: float = 0
         pit_safe_sentence: Sentence = Sentence("pit", "p", literals=coords, negated=True)
-        pit_danger_sentence = Sentence("pit", "p", literals=coords, negated=False)
+        pit_danger_sentence: Sentence = Sentence("pit", "p", literals=coords, negated=False)
 
+        shortest_pit_clause_len: float = float('inf')
         for clause in self.knowledge_base.kb:
+            if str(clause) == str(pit_safe_sentence):
+                break
             for sentence in clause.sentences:
-                if str(pit_safe_sentence) == str(sentence):
-                    pit_danger = 0
-                    break
-                elif str(pit_danger_sentence) == str(sentence):
-                    pit_danger += 1 / len(clause)
+                if str(sentence) == str(pit_danger_sentence):
+                    if len(clause) < shortest_pit_clause_len:
+                        shortest_pit_clause_len = len(clause)
 
-        gold_likelihood = 0
-        gold_sure_sentence: Sentence = Sentence("gold", "g", literals=coords, negated=False)
-        gold_not_there_sentence: Sentence = Sentence("gold", "g", literals=coords, negated=True)
+        if shortest_pit_clause_len == 1:
+            pit_danger = float('inf')
+        else:
+            pit_danger = 1 / shortest_pit_clause_len
 
+        gold_danger: float = 0
+        gold_safe_sentence: Sentence = Sentence("gold", "g", literals=coords, negated=True)
+        gold_danger_sentence: Sentence = Sentence("gold", "g", literals=coords, negated=False)
+
+        shortest_gold_clause_len: float = float('inf')
         for clause in self.knowledge_base.kb:
+            if str(clause) == str(gold_safe_sentence):
+                break
             for sentence in clause.sentences:
-                if str(gold_sure_sentence) == str(sentence):
-                    gold_likelihood = float('inf')
-                    break
-                elif str(gold_not_there_sentence) == str(sentence):
-                    gold_likelihood += 0
+                if str(sentence) == str(gold_danger_sentence):
+                    if len(clause) < shortest_gold_clause_len:
+                        shortest_gold_clause_len = len(clause)
 
-        return wumpus_danger + pit_danger - gold_likelihood
+        if shortest_gold_clause_len == 1:
+            gold_danger = float('inf')
+        else:
+            gold_danger = 1 / shortest_gold_clause_len
+
+        return wumpus_danger + pit_danger - gold_danger
 
     def disp(self):
         rows = []
