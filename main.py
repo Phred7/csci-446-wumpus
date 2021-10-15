@@ -150,7 +150,7 @@ if __name__ == '__main__':
                     print("comparison", stm, "==", copy_clause)
                     if str(stm) == str(copy_clause):
                         #print("comparison", stm, "==", clause)
-                        conclusion.sentences.remove(stm)
+                        conclusion.remove(stm)
                         #conclusion.negate()
                         conclusion.string = ""
                         rational.knowledge_base.string = ""

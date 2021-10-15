@@ -51,3 +51,7 @@ class Clause:
     def negate(self) -> None:
         self.negated = False if self.negated else True
         self.string = ""
+
+    def remove(self, item: Sentence):
+        self.sentences.remove(item)
+        self.string = ""
