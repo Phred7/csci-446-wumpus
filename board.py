@@ -1,5 +1,7 @@
 from random import randint
 from random import random
+from typing import List
+
 import numpy as np
 from copy import deepcopy
 from enums import *
@@ -57,7 +59,15 @@ class Board:
         self.grid[coords[0]][coords[1]][CellContent.WUMPUS] = True
         self.wumpus_count += 1
 
-    def disp(self):
+    def __str__(self) -> str:
+        string: str = ""
+        rows: List[str] = self.disp(dunder_str=True)
+        for row in rows:
+            string += row
+            string += "\n"
+        return string
+
+    def disp(self, *, dunder_str: bool = False) -> List[str]:
         rows = []
         for i in range(self.size):
             string = "|"
@@ -74,8 +84,10 @@ class Board:
                     string += "_|"
             rows.append(string)
         rows.reverse()
-        for row in rows:
-            print(row)
+        if not dunder_str:
+            for row in rows:
+                print(row)
+        return rows
 
     def path_to_gold_exists(self, coords, gold_coords) -> bool:
         def dfs(loc, target, marked, edges) -> bool:

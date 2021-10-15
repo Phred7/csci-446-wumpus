@@ -38,15 +38,14 @@ if __name__ == '__main__':
     #     print(f"Threads 0-{thread_count - 1} joined")
 
     # Example Unification:
-    knowledge_base: KnowledgeBase = KnowledgeBase(5)
-    sentence: Sentence = Sentence("foo", "f", variables=["x+1"])
-    clause: Clause = Clause([sentence])
-    sentence_2: Sentence = Sentence("foo", "f", literals=[0])
-    clause_2: Clause = Clause([sentence_2])
-    knowledge_base.set_rules([clause, clause_2])
-    print(knowledge_base)
-    print(f"unified: {knowledge_base.unify(knowledge_base.get_clause(0), knowledge_base.get_clause(1))}\n")
-    knowledge_base.infer()
+    # knowledge_base: KnowledgeBase = KnowledgeBase()
+    # sentence: Sentence = Sentence("foo", "f", variables=["x+1"])
+    # clause: Clause = Clause([sentence])
+    # sentence_2: Sentence = Sentence("foo", "f", literals=[0])
+    # clause_2: Clause = Clause([sentence_2])
+    # knowledge_base.set_rules([clause, clause_2])
+    # print(knowledge_base)
+    # print(f"unified: {knowledge_base.unify(knowledge_base.get_clause(0), knowledge_base.get_clause(1))}\n")
 
     # Example Unification 2:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
@@ -74,19 +73,20 @@ if __name__ == '__main__':
     # print(knowledge_base)
 
     # Example Rational:
-    # board: Board = Board(size=5)
-    # board.generate_board()
-    # rational: RationalExplorer = RationalExplorer(board)
+    board: Board = Board(size=5)
+    board.generate_board()
+    rational: RationalExplorer = RationalExplorer(board)
     # rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
-    # # print(rational.knowledge_base)
-    # while (not rational.is_dead) and (not rational.has_gold):
-    #     rational.act()
-    #     rational.disp()
-    #     print()
-    # if rational.has_gold:
-    #     print("Found gold")
-    # else:
-    #     print("Big Dead")
+    print(f"initial KB:\n{rational.knowledge_base}")
+    while (not rational.is_dead) and (not rational.has_gold):
+        rational.act()
+        rational.disp()
+        print()
+    if rational.has_gold:
+        print("Found gold")
+    else:
+        print("Big Dead")
+    print(rational.board)
     print("Exiting")
     # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
     # print(rational.knowledge_base)

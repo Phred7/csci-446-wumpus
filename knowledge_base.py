@@ -41,12 +41,22 @@ class KnowledgeBase:
         self.clauses += 1
         self.kb.append(item)
 
-    def query(self, query_sentence: Sentence) -> bool:
+    def query_in(self, query_sentence: Sentence) -> List[Clause]:
+        clause_list: List[Clause] = []
+        for clause in self.kb:
+            if not clause.rule:
+                for sentence in clause.sentences:
+                    if str(query_sentence) in str(sentence) and not str(query_sentence) == str(clause) and query_sentence.negated == sentence.negated:
+                        clause_list.append(clause)
+        return clause_list
+
+    def query_equal(self, query_sentence: Sentence) -> List[Clause]:
+        clause_list: List[Clause] = []
         for clause in self.kb:
             if not clause.rule:
                 if str(query_sentence) == str(clause):
-                    return True
-        return False
+                    clause_list.append(clause)
+        return clause_list
 
     def remove_clause(self, clause_kb_id: int) -> None:
         self.kb.remove(self.get_clause(clause_kb_id))
@@ -84,12 +94,13 @@ class KnowledgeBase:
         return new_facts
 
     def infer(self) -> None:
-        print(self)
+        # print(self)
         new_facts: List[Clause] = deepcopy(self.new_facts)
+        self.new_clauses_are_new = False
         for fact in new_facts:
             self.generate_facts_from_senses(fact)
             fact.new = False
-        print(self)
+        self.new_clauses_are_new = True
         pass
 
     # def resolution(self) -> bool:
