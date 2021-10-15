@@ -24,7 +24,4 @@ class Sensation(IntEnum):
 class VisitState(IntEnum):
     UNKNOWN = 0
     VISITED = 1
-    SAFE_FRONTIER = 2
-    DANGEROUS_FRONTIER = 3
-    IMPASSABLE = 4
-    ATTRACTIVE_FRONTIER = 5
+    FRONTIER = 2

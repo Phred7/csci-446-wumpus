@@ -42,16 +42,9 @@ class ReactiveExplorer(Explorer):
 
 
 
+
         for i, j in adjacent_cells:
-            if not self.visit_map[i, j] == VisitState.VISITED \
-                    and not self.visit_map[i, j] == VisitState.SAFE_FRONTIER\
-                    and not self.visit_map[i, j] == VisitState.IMPASSABLE:
-                if sensations[Sensation.STENCH] or sensations[Sensation.BREEZE]:
-                    self.visit_map[i, j] = VisitState.DANGEROUS_FRONTIER
-                elif sensations[Sensation.GLIMMER]:
-                    self.visit_map[i, j] = VisitState.ATTRACTIVE_FRONTIER
-                else:
-                    self.visit_map[i, j] = VisitState.SAFE_FRONTIER
+            self.visit_map[i, j] = VisitState.FRONTIER
 
         # self.disp()
 
