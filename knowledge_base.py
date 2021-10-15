@@ -132,19 +132,23 @@ class KnowledgeBase:
 
     @staticmethod
     def unify_variable(expression, variable: str, theta: str) -> str:
-        if f"{variable}/" in theta:
-            if type(variable) == int:
-                variable = str(variable)
-            beta: str = theta[theta.index(variable) + 2:]
-            value: str = beta[:beta.index("}")]
-            return KnowledgeBase.unify(value, expression, theta=theta)
-        elif f"{expression}/" in theta:
+        # if f"{variable}/" in theta:
+        #     print("var ",variable)
+        #     if type(variable) == int:
+        #         variable = str(variable)
+        #     beta: str = theta[theta.index(variable) + 2:]
+        #     value: str = beta[:beta.index("}")]
+        #     return KnowledgeBase.unify(value, expression, theta=theta)
+        if f"{expression}/" in theta:
+            #print("exp ", expression)
             beta: str = theta[theta.index(variable) + 2:]
             value: str = beta[:beta.index("}")]
             return KnowledgeBase.unify(variable, value, theta=theta)
         elif KnowledgeBase.occur_check(variable, expression):
+            #print("fail")
             return "failure"
         else:
+            #print("here")
             expression = expression[:expression.index("+")] if "+" in expression else expression
             expression = expression[:expression.index("-")] if "-" in expression else expression
             expression = expression.strip('')

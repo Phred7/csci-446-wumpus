@@ -42,3 +42,7 @@ class Clause:
 
     def set_rule(self) -> None:
         self.rule = True
+
+    def negate(self) -> None:
+        self.negated = False if self.negated else True
+        self.string = str(self)

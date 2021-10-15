@@ -78,7 +78,7 @@ if __name__ == '__main__':
     rational: RationalExplorer = RationalExplorer(board)
     rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
     #print(f"{rational.board.__class__.__name__}:\n{rational.board}")
-   #print(rational.knowledge_base)
+    #print(rational.knowledge_base)
     rules: List[Clause] = rational.knowledge_base.get_rules()
     sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
     for rule in rules:
@@ -104,17 +104,58 @@ if __name__ == '__main__':
                                 args.append(new_arg)
                     sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
                 rational.knowledge_base.append(Clause(sentences))
-    #print(rational.knowledge_base)
+    print(rational.knowledge_base)
 
     #resolution example 1
     #print(rational.knowledge_base)
     rules: List[Clause] = rational.knowledge_base.get_rules()
-    print(rules)
-    kb = rational.knowledge_base
-    for clauses in kb:
-        print(clauses)
-        for arg in clauses.sentences:
-            print(arg)
+    #conclusion = Clause([Sentence('stench', 'w', literals=[2, 2], negated=True)])
+    #print("before c", conclusion)
+    rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 0], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 1], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[1, 0], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 0], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 1], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[1, 0], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 0], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 1], negated=True)]))
+    rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[1, 0], negated=True)]))
+    print("kb ",rational.knowledge_base)
+    # conclusion = conclusion.negate()
+    # print("c", conclusion)
+    kb: List[Clause] = rational.knowledge_base.get_facts()
+    #conclusion = kb[1]
+    #print('conclusion ',conclusion)
+    for clause in kb:
+    #     print()
+    #     print("c ", clause)
+    #     print()
+        if len(clause) != 1:
+            #print("in")
+            conclusion = clause
+            for clause in kb:
+                # print("s ",sentence)
+                # print("clause ", clause)
+                # print("conclusion ", conclusion)
+                for stm in conclusion.sentences:
+                    #print("stm", stm)
+                    # print("before negate", clause)
+                    # clause.negate()
+                    # print("negate", clause)
+                    negated_sentence = "~" + str(clause.sentences[0])
+                    print("comparison", stm, "==", negated_sentence)
+                    #print("negated",negated_sentence[:negated_sentence.index("(")-1:])
+                    if negated_sentence[:negated_sentence.index("(")-1:] == "~~":
+                        #print("in")
+                        negated_sentence = negated_sentence.replace("~", "")
+                    print("comparison2", stm, "==", negated_sentence)
+                    if str(stm) == str(negated_sentence):
+                        pass
+                            #conclusion.remove(stm)
+            #if conclusion contradicts sentence
+
+
+
 
 
     # Example KB:
