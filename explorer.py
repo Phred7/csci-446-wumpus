@@ -287,8 +287,6 @@ class Explorer:
 
                         E[key] = 'l'
 
-                    else:
-                        E[key] = 'n'
 
                 # if v_1 is to the left of v_2
                 elif (x_1 == x_2 - 1) and (y_1 == y_2) and (f_1 == Facing.EAST) and (f_2 == Facing.EAST):
@@ -305,10 +303,6 @@ class Explorer:
                 # if v_1 is below v_2
                 elif (x_1 == x_2) and (y_1 == y_2 - 1) and (f_1 == Facing.NORTH) and (f_2 == Facing.NORTH):
                     E[key] = 'w'
-
-                # no relation between v_1 and v_2
-                else:
-                    E[key] = 'n'
 
         self.G = (V, E)
         return
@@ -362,7 +356,6 @@ class Explorer:
             for edge in E.keys():
                 if edge[0] == s \
                         and edge[1] not in predecessors.keys() \
-                        and E[edge] != 'n' \
                         and edge[1] != (tuple(self.location), self.facing)\
                         and (edge[1] in safe_cells_with_facings or edge[1][0] == target[0]):
                             predecessors[edge[1]] = s

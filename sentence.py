@@ -10,6 +10,14 @@ class Sentence:
         self.identifier: str = identifier
         self.literals: List[int] = [] if literals is None else literals
         self.variables: List[str] = [] if variables is None else variables
+
+        translated_variables = []
+        for variable in self.variables:
+            if type(variable) != str:
+                variable = str(variable)
+            translated_variables.append(variable)
+        self.variables = translated_variables
+
         self.arguments: List[str] = deepcopy(self.literals) if self.variables == [] else deepcopy(self.variables)
         self.vars: bool = True if len(self.variables) != 0 else False
         self.verbose: bool = True
