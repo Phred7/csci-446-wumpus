@@ -29,3 +29,7 @@ class Sentence:
             self.string = deepcopy(string)
         return self.string
 
+    def negate(self) -> None:
+        self.negated = False if self.negated else True
+        self.string = ""
+

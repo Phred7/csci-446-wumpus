@@ -126,31 +126,46 @@ if __name__ == '__main__':
     kb: List[Clause] = rational.knowledge_base.get_facts()
     #conclusion = kb[1]
     #print('conclusion ',conclusion)
-    for clause in kb:
-    #     print()
-    #     print("c ", clause)
-    #     print()
-        if len(clause) != 1:
+    for fact in kb:
+        # print()
+        # print("c ", clause)
+        # print()
+        if len(fact) != 1:
             #print("in")
-            conclusion = clause
+            conclusion = fact
             for clause in kb:
-                # print("s ",sentence)
-                # print("clause ", clause)
-                # print("conclusion ", conclusion)
+                #print("s ",sentence)
+                # x
+                copy_clause = deepcopy(clause)
+                copy_clause.negate()
                 for stm in conclusion.sentences:
-                    #print("stm", stm)
-                    # print("before negate", clause)
-                    # clause.negate()
-                    # print("negate", clause)
-                    negated_sentence = "~" + str(clause.sentences[0])
-                    print("comparison", stm, "==", negated_sentence)
-                    #print("negated",negated_sentence[:negated_sentence.index("(")-1:])
-                    if negated_sentence[:negated_sentence.index("(")-1:] == "~~":
-                        #print("in")
-                        negated_sentence = negated_sentence.replace("~", "")
-                    print("comparison2", stm, "==", negated_sentence)
-                    if str(stm) == str(negated_sentence):
-                        pass
+                    # print("clause2 ", clause)
+                    # print("stm", stm)
+                    #print("before negate", clause)
+                    #print("after negate", str(clause))
+                    if copy_clause.negated and copy_clause.sentences[0].negated:
+                        copy_clause.sentences[0].negate()
+                        copy_clause.negate()
+                        #print("after negate2", str(clause))
+                    print("comparison", stm, "==", copy_clause)
+                    if str(stm) == str(copy_clause):
+                        #print("comparison", stm, "==", clause)
+                        conclusion.sentences.remove(stm)
+                        #conclusion.negate()
+                        conclusion.string = ""
+                        rational.knowledge_base.string = ""
+                        print("conc ", conclusion)
+
+    print("kb after",rational.knowledge_base)
+                    # negated_sentence = "~" + str(clause.sentences[0])
+                    # print("comparison", stm, "==", negated_sentence)
+                    # #print("negated",negated_sentence[:negated_sentence.index("(")-1:])
+                    # if negated_sentence[:negated_sentence.index("(")-1:] == "~~":
+                    #     #print("in")
+                    #     negated_sentence = negated_sentence.replace("~", "")
+                    # print("comparison2", stm, "==", negated_sentence)
+                    # if str(stm) == str(negated_sentence):
+                    #     pass
                             #conclusion.remove(stm)
             #if conclusion contradicts sentence
 
