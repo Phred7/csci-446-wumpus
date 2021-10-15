@@ -46,7 +46,7 @@ class Board:
         return
 
     def kill_wumpus(self, coords) -> None:
-        self.grid[coords[0]][coords[1]][CellContent.CORPSE] = True
+        self.grid[coords[0]][coords[1]][CellContent.OBSTACLE] = True
         return
 
     def insert_wumpus(self, coords):

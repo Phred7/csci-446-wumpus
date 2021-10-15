@@ -16,6 +16,7 @@ class Clause:
         self.string: str = ""
         self.kb_id: int = -1
         self.rule: bool = False
+        self.new: bool = True
 
     def __str__(self) -> str:  # TODO anytime a clause is modified self.string MUST be set to ""
         """
@@ -24,10 +25,14 @@ class Clause:
         """
         if self.string == "":
             string: str = ""
+            if self.negated:
+                string += "~("
             for arg in self.sentences:
                 string += f"{str(arg)}"
                 if self.sentences.index(arg) != len(self.sentences) - 1:
                     string += f" {self.operator} "
+            if self.negated:
+                string += ")"
             self.string = deepcopy(string)
         return self.string
 
@@ -45,4 +50,4 @@ class Clause:
 
     def negate(self) -> None:
         self.negated = False if self.negated else True
-        self.string = str(self)
+        self.string = ""

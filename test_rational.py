@@ -9,9 +9,9 @@ def TestRational():
     print()
     ex: RationalExplorer = RationalExplorer(b)
     print(ex.knowledge_base)
-    ex.update_knowledge_base()
-    print(ex.knowledge_base)
-    ex.act()
+#    ex.update_knowledge_base()
+#    print(ex.knowledge_base)
+#    ex.act()
 
     # while (not ex.is_dead) and (not ex.has_gold):
     #     ex.act()
