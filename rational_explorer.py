@@ -317,57 +317,57 @@ class RationalExplorer(Explorer):
         ~sc(x, 2, 0) | w(x, 3) | w(x, 4)
         ~sc(x, 3, 0) | w(x, 4)
         """
-        # for facing in Facing:
-        #
-        #     if facing == Facing.NORTH:
-        #
-        #         for offset in range(1, self.board.size, 1):
-        #             possible_targets: List[Sentence] = []
-        #             facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", offset - 1, "0"], negated=True)
-        #             possible_targets.append(facing_sentence)
-        #             for i in range(0, self.board.size - offset, 1):
-        #                 possible_target: Sentence = Sentence("wumpus", "w", variables=["x", offset + i])
-        #                 possible_targets.append(possible_target)
-        #             target_clause: Clause = Clause(possible_targets)
-        #             rules.append(target_clause)
-        #
-        #     elif facing == Facing.EAST:
-        #
-        #         for offset in range(1, self.board.size, 1):
-        #             possible_targets: List[Sentence] = []
-        #             facing_sentence: Sentence = Sentence("scream", "sc", variables=[offset - 1, "y", "1"], negated=True)
-        #             possible_targets.append(facing_sentence)
-        #             for i in range(0, self.board.size - offset, 1):
-        #                 possible_target: Sentence = Sentence("wumpus", "w", variables=[offset + i, "y"])
-        #                 possible_targets.append(possible_target)
-        #             target_clause: Clause = Clause(possible_targets)
-        #             rules.append(target_clause)
-        #
-        #     elif facing == Facing.SOUTH:
-        #
-        #         for offset in range(1, self.board.size, 1):
-        #             possible_targets: List[Sentence] = []
-        #             facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", 4 - (offset - 1), "2"],
-        #                                                  negated=True)
-        #             possible_targets.append(facing_sentence)
-        #             for i in range(0, self.board.size - offset, 1):
-        #                 possible_target: Sentence = Sentence("wumpus", "w", variables=["x", 4 - (offset + i)])
-        #                 possible_targets.append(possible_target)
-        #             target_clause: Clause = Clause(possible_targets)
-        #             rules.append(target_clause)
-        #
-        #     elif facing == Facing.WEST:
-        #
-        #         for offset in range(1, self.board.size, 1):
-        #             possible_targets: List[Sentence] = []
-        #             facing_sentence: Sentence = Sentence("scream", "sc", variables=[4 - (offset - 1), "y", "3"],
-        #                                                  negated=True)
-        #             possible_targets.append(facing_sentence)
-        #             for i in range(0, self.board.size - offset, 1):
-        #                 possible_target: Sentence = Sentence("wumpus", "w", variables=[4 - (offset + i), "y"])
-        #                 possible_targets.append(possible_target)
-        #             target_clause: Clause = Clause(possible_targets)
-        #             rules.append(target_clause)
+        for facing in Facing:
+
+            if facing == Facing.NORTH:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", offset - 1, "0"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=["x", offset + i])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.EAST:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=[offset - 1, "y", "1"], negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=[offset + i, "y"])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.SOUTH:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=["x", 4 - (offset - 1), "2"],
+                                                         negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=["x", 4 - (offset + i)])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
+
+            elif facing == Facing.WEST:
+
+                for offset in range(1, self.board.size, 1):
+                    possible_targets: List[Sentence] = []
+                    facing_sentence: Sentence = Sentence("scream", "sc", variables=[4 - (offset - 1), "y", "3"],
+                                                         negated=True)
+                    possible_targets.append(facing_sentence)
+                    for i in range(0, self.board.size - offset, 1):
+                        possible_target: Sentence = Sentence("wumpus", "w", variables=[4 - (offset + i), "y"])
+                        possible_targets.append(possible_target)
+                    target_clause: Clause = Clause(possible_targets)
+                    rules.append(target_clause)
 
         self.knowledge_base.set_rules(rules)
 

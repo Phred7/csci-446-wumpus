@@ -59,32 +59,37 @@ class KnowledgeBase:
     def get_clause(self, clause_kb_id: int) -> Clause:
         return self.kb[clause_kb_id]
 
-    def get_rules(self) -> List[Clause]:
+    @property
+    def rules(self) -> List[Clause]:
         rules: List[Clause] = []
         for clause in self.kb:
             if clause.rule:
                 rules.append(clause)
         return rules
 
-    def get_facts(self) -> List[Clause]:
+    @property
+    def facts(self) -> List[Clause]:
         facts: List[Clause] = []
         for clause in self.kb:
             if not clause.rule:
                 facts.append(clause)
         return facts
 
-    def get_new_facts(self) -> List[Clause]:
+    @property
+    def new_facts(self) -> List[Clause]:
         new_facts: List[Clause] = []
-        for clause in self.get_facts():
+        for clause in self.facts:
             if clause.new:
                 new_facts.append(clause)
         return new_facts
 
     def infer(self) -> None:
-        new_facts: List[Clause] = deepcopy(self.get_new_facts())
+        print(self)
+        new_facts: List[Clause] = deepcopy(self.new_facts)
         for fact in new_facts:
             self.generate_facts_from_senses(fact)
             fact.new = False
+        print(self)
         pass
 
     # def resolution(self) -> bool:
@@ -173,11 +178,11 @@ class KnowledgeBase:
         return False
 
     def generate_facts_from_senses(self, fact: Clause) -> None:
-        rules: List[Clause] = self.get_rules()
-        sentence: Sentence = fact.sentences[0]
+        rules: List[Clause] = self.rules
+        fact_sentence: Sentence = fact.sentences[0]
         for rule in rules:
-            if rule.sentences[0].name == sentence.name:
-                theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
+            if rule.sentences[0].name == fact_sentence.name:
+                theta: str = KnowledgeBase.unify(fact_sentence, rule.sentences[0])
                 if theta != "failure":
                     # print(f"theta: {theta}")
                     sentences: List[Sentence] = []
@@ -214,4 +219,11 @@ class KnowledgeBase:
                     remove.reverse()
                     for rem in remove:
                         sentences.pop(rem)
-                    self.append(Clause(sentences))
+                    if fact_sentence.negated == rule.sentences[0].negated:
+                        for sentence in sentences:
+                            sentence.negate()
+                            self.append(Clause([sentence]))
+                        # == first sentence in rule is negated:
+                        # add each sentence as a negated clause
+                    else:
+                        self.append(Clause(sentences))
