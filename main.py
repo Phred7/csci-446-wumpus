@@ -76,8 +76,8 @@ if __name__ == '__main__':
     board: Board = Board(size=5)
     board.generate_board()
     rational: RationalExplorer = RationalExplorer(board)
-    rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
-    # print(rational.knowledge_base)
+    # rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
+    print(f"initial KB:\n{rational.knowledge_base}")
     while (not rational.is_dead) and (not rational.has_gold):
         rational.act()
         rational.disp()
@@ -86,6 +86,7 @@ if __name__ == '__main__':
         print("Found gold")
     else:
         print("Big Dead")
+    print(rational.board)
     print("Exiting")
     # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
     # print(rational.knowledge_base)

@@ -430,7 +430,15 @@ class RationalExplorer(Explorer):
 
         return wumpus_danger + pit_danger - gold_likelihood
 
-    def disp(self):
+    def __str__(self) -> str:
+        string: str = ""
+        rows: List[str] = self.disp(dunder_str=True)
+        for row in rows:
+            string += row
+            string += "\n"
+        return string
+
+    def disp(self, *, dunder_str: bool = False) -> List[str]:
         rows = []
         for i in range(self.board.size):
             string = "|"
@@ -456,5 +464,7 @@ class RationalExplorer(Explorer):
                         string += '0|'
             rows.append(string)
         rows.reverse()
-        for row in rows:
-            print(row)
+        if not dunder_str:
+            for row in rows:
+                print(row)
+        return rows
