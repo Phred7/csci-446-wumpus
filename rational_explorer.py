@@ -30,7 +30,7 @@ class RationalExplorer(Explorer):
     # - executes that path
     # -
     def act(self) -> None:
-        if self.actions_taken > 1000:
+        if self.actions_taken > 50:
             self.die()
 
         if self.is_dead or self.has_gold:
@@ -392,6 +392,11 @@ class RationalExplorer(Explorer):
 
     # TODO: MAKE GOOD
     def assign_danger_value(self, coords) -> float:
+
+        obstacle_clause: Clause = Clause([Sentence("obstacle", 'o', literals=coords, negated=False)])
+        for clause in self.knowledge_base.kb:
+            if str(clause) == str(obstacle_clause):
+                return float('inf')
 
         wumpus_danger: float = 0
         wumpus_safe_sentence: Sentence = Sentence("wumpus", "w", literals=coords, negated=True)
