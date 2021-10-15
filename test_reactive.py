@@ -7,7 +7,7 @@ def testReactiveExplorer():
 
 
 
-    # b = board.Board(10)
+    # b = board.Board(6)
     # b.generate_board()
     #
     #
@@ -23,7 +23,7 @@ def testReactiveExplorer():
     #     print("won")
     # else:
     #     print("lost")
-
+    #
     # print(ex.history)
 
     numCaves = 30

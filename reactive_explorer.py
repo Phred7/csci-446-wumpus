@@ -26,7 +26,6 @@ class ReactiveExplorer(Explorer):
 
         adjacent_cells = self.get_adjacent_cells()
 
-        sensations = self.observe()
         # if sensations[Sensation.STENCH]:
         #     if self.arrows > 0:
         #         scream = self.shoot()
@@ -40,36 +39,39 @@ class ReactiveExplorer(Explorer):
         #             elif self.facing == Facing.WEST:
         #                 self.visit_map[self.location[0] - 1][self.location[1]] = VisitState.SAFE_FRONTIER
 
-
-
-
         for i, j in adjacent_cells:
-            self.visit_map[i, j] = VisitState.FRONTIER
+            if not self.visit_map[i, j] == VisitState.VISITED and not self.visit_map[i, j] == VisitState.IMPASSABLE:
+                self.visit_map[i, j] = VisitState.FRONTIER
+
+        sensations = self.observe()
 
         # self.disp()
-
+        # for i in range(len(sensations)):
+        #     if sensations[i]:
+        #         print(Sensation(i).name)
 
         target: Tuple[int, int] = None
-        for i in range(len(self.visit_map)):
-            for j in range(len(self.visit_map)):
-                if self.visit_map[i, j] == VisitState.ATTRACTIVE_FRONTIER:
+
+        if not sensations[Sensation.STENCH] and not sensations[Sensation.BREEZE]:
+            for i, j in adjacent_cells:
+                if self.visit_map[i][j] == VisitState.FRONTIER:
                     if target == None:
                         target = (i, j)
 
-        for i in range(len(self.visit_map)):
-            for j in range(len(self.visit_map)):
-                if self.visit_map[i, j] == VisitState.SAFE_FRONTIER:
-                    if target == None:
-                        target = (i, j)
 
         for i in range(len(self.visit_map)):
             for j in range(len(self.visit_map)):
-                if self.visit_map[i, j] == VisitState.DANGEROUS_FRONTIER:
+                if self.visit_map[i, j] == VisitState.FRONTIER and (i, j) not in adjacent_cells:
                     if target == None:
                         target = (i, j)
+
+        # print(target)
+
         if target == None:
+            print("ah fuck i'm lost")
             self.die()
             return
+
         path = self.path(target)
 
         for step in path:
@@ -82,6 +84,11 @@ class ReactiveExplorer(Explorer):
             elif step == 'r':
                 self.turn(Direction.RIGHT)
 
+    def __str__(self) -> str:
+        string = ""
+        for row in self.disp():
+            string += row + "\n"
+        return string
 
     def disp(self):
         rows = []
@@ -100,18 +107,15 @@ class ReactiveExplorer(Explorer):
                 else:
                     state = self.visit_map[j, i]
                     if state == VisitState.VISITED:
-                        string += "V|"
-                    elif state == VisitState.SAFE_FRONTIER:
+                        string += "S|"
+                    elif state == VisitState.FRONTIER:
                         string += "F|"
-                    elif state == VisitState.DANGEROUS_FRONTIER:
-                        string += "D|"
                     elif state == VisitState.UNKNOWN:
                         string += "_|"
                     elif state == VisitState.IMPASSABLE:
                         string += "I|"
-                    elif state == VisitState.ATTRACTIVE_FRONTIER:
-                        string += "A|"
             rows.append(string)
         rows.reverse()
         for row in rows:
             print(row)
+        return rows
