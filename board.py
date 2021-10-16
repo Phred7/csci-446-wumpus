@@ -34,7 +34,8 @@ class Board:
 
         for i in range(self.size):
             for j in range(self.size):
-                if random() < pit_probability and not self.grid[i][j][CellContent.WUMPUS] \
+                if random() < pit_probability \
+                        and not self.grid[i][j][CellContent.WUMPUS] \
                         and not self.grid[i][j][CellContent.GOLD] \
                         and not (i == 0 and j == 0):
                     if self.path_to_gold_exists([i, j], (gold_x, gold_y)):
@@ -42,7 +43,8 @@ class Board:
 
         for i in range(self.size):
             for j in range(self.size):
-                if random() < obstacle_probability and not self.grid[i][j][CellContent.WUMPUS] \
+                if random() < obstacle_probability \
+                        and not self.grid[i][j][CellContent.WUMPUS] \
                         and not self.grid[i][j][CellContent.GOLD] \
                         and not self.grid[i][j][CellContent.PIT] \
                         and not (i == 0 and j == 0):

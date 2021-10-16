@@ -13,7 +13,7 @@ class Explorer:
 
     # Initializes variables for explorer class.
     def __init__(self, board: Board, messages=False):
-
+        self.max_age = 200
         self.actions_taken: int = 0
         self.facing: Facing = Facing.NORTH
         self.location: List[int, int] = [0, 0]

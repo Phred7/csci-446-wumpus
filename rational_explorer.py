@@ -30,7 +30,7 @@ class RationalExplorer(Explorer):
     # - executes that path
     # -
     def act(self) -> None:
-        if self.actions_taken > 50:
+        if self.actions_taken > self.max_age:
             self.die()
 
         if self.is_dead or self.has_gold:
@@ -62,7 +62,7 @@ class RationalExplorer(Explorer):
         queue.sort(key=lambda x: x[1], reverse=True)
 
         target = tuple(queue.pop()[0])
-        print("Target is", target)
+
         path = self.path(target)
 
         for step in path:
@@ -73,14 +73,13 @@ class RationalExplorer(Explorer):
             elif step == 'r':
                 self.turn(Direction.RIGHT)
 
-        # print("Ending action.")
         return
 
     # Modified implementation of parent class's walk method.
     # Calls parent class's walk method, then if the walk was unsuccessful, adds a bump sensation to the knowledege base.
     # Otherwise, adds a lack of bump sensation to the knowledge base.
     def walk(self) -> bool:
-        bumped: bool = super().walk()
+        bumped: bool = not super().walk()
         target_cell: List[int] = deepcopy(self.location)
 
         if self.facing == Facing.NORTH:
@@ -91,10 +90,10 @@ class RationalExplorer(Explorer):
             target_cell[1] -= 1
         elif self.facing == Facing.WEST:
             target_cell[0] -= 1
-        bump_clause: Clause = Clause([Sentence("bump", "bu", literals=target_cell, negated=False)]) \
-            if bumped \
-            else Clause([Sentence("bump", "bu", literals=target_cell, negated=True)])
-        self.knowledge_base.append(bump_clause)
+
+        if bumped:
+            self.knowledge_base.append(Clause([Sentence("bump", "bu", literals=target_cell, negated=False)]))
+
         return bumped
 
     def shoot(self) -> None:
@@ -390,7 +389,6 @@ class RationalExplorer(Explorer):
 
         self.knowledge_base.new_clauses_are_new = True
 
-    # TODO: MAKE GOOD
     def assign_danger_value(self, coords) -> float:
 
         obstacle_clause: Clause = Clause([Sentence("obstacle", 'o', literals=coords, negated=False)])
@@ -452,7 +450,7 @@ class RationalExplorer(Explorer):
         else:
             gold_danger = 1 / shortest_gold_clause_len
 
-        return wumpus_danger + pit_danger - gold_danger
+        return wumpus_danger + pit_danger - (0.1 * gold_danger)
 
     def __str__(self) -> str:
         string: str = ""

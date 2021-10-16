@@ -11,7 +11,6 @@ class ReactiveExplorer(Explorer):
     def __init__(self, _board: Board):
         super().__init__(_board)
         self.visit_map = numpy.full((_board.size, _board.size), 0)
-        self.max_age = 500
         super().__init__(_board, False)
 
     def act(self) -> None:

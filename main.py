@@ -1,12 +1,13 @@
 import threading
 from threading import Thread
 
+import rational_explorer
 from knowledge_base import *
 from clause import *
 from sentence import *
 from board import *
 from rational_explorer import *
-
+from datetime import datetime
 
 def explore(explorer: RationalExplorer) -> int:
     """
@@ -72,23 +73,75 @@ if __name__ == '__main__':
     # knowledge_base.resolution()
     # print(knowledge_base)
 
+    # # board generation verification
+    # board: Board = Board(size=5)
+    # board.generate_board()
+    # print(board)
+
+
     # Example Rational:
-    board: Board = Board(size=5)
-    board.generate_board()
-    board.disp()
-    rational: RationalExplorer = RationalExplorer(board)
-    # print(f"initial KB:\n{rational.knowledge_base}")
-    while (not rational.is_dead) and (not rational.has_gold):
-        rational.act()
-        print(rational)
+    # board: Board = Board(size=5)
+    # board.generate_board()
+    # print(board)
+    # print()
+    # rational: RationalExplorer = RationalExplorer(board)
+    # # print(f"initial KB:\n{rational.knowledge_base}")
+    # while (not rational.is_dead) and (not rational.has_gold):
+    #     rational.act()
+    #     print(rational)
+    #     print()
+    # if rational.has_gold:
+    #     print("Found gold")
+    # else:
+    #     print("Big Dead")
+    # print(rational)
+    # print(rational.board)
+    # print("Exiting")
+
+    # More rigorous rational testbed:
+    numCaves = 30
+    boardSizes = [5, 10, 15, 20, 25]
+    for boardSize in boardSizes:
+        numGold = 0
+        numDeaths = 0
+        numWump = 0
+        numPit = 0
+        numOld = 0
+        for i in range(numCaves):
+            start = datetime.now()
+            b = Board(boardSize)
+            b.generate_board()
+            e = rational_explorer.RationalExplorer(b)
+            while not e.is_dead and not e.has_gold:
+                e.act()
+            if e.is_dead:
+                numDeaths += 1
+            if e.has_gold:
+                numGold += 1
+
+            x = e.location[0]
+            y = e.location[1]
+
+            if e.board.grid[x][y][CellContent.WUMPUS]:
+                numWump += 1
+            if e.board.grid[x][y][CellContent.PIT]:
+                numPit += 1
+            if e.max_age <= e.actions_taken:
+                numOld += 1
+
+            end = datetime.now()
+
+            print("Finished cave", i, "in", end - start, "      " + ("X" if e.is_dead else "G"))
+        print("Board size:                  " + str(boardSize) + "x" + str(boardSize))
+        print("Number of runs:             ", numCaves)
+        print("Number of times gold found: ", numGold)
+        print("Number of times died:       ", numDeaths)
+        print("Success rate:               ", numGold / numCaves)
+        print("Deaths from old age:        ", numOld / numCaves)
+        print("Deaths from pit:            ", numPit / numCaves)
+        print("Deaths from wumpus:         ", numWump / numCaves)
         print()
-    if rational.has_gold:
-        print("Found gold")
-    else:
-        print("Big Dead")
-    print(rational)
-    print(rational.board)
-    print("Exiting")
+
 
     # rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
     # rational.knowledge_base.infer()
