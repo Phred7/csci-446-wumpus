@@ -100,39 +100,73 @@ class KnowledgeBase:
         for fact in new_facts:
             self.generate_facts_from_senses(fact)
             fact.new = False
+        self.resolution()
         self.new_clauses_are_new = True
         pass
 
-    # def resolution(self) -> bool:
-    #     last_clause: Clause = self.kb[-1]
-    #     resolved: bool = False
-    #     for clause in self.kb:
-    #         if last_clause == clause:
-    #             break
-    #         if (len(last_clause) == 1 and len(clause) == 2) or len(last_clause) == 2 and len(clause) == 1:
-    #             long_clause: Clause = clause if len(clause) == 2 else last_clause
-    #             short_clause: Clause = clause if len(clause) == 1 else last_clause
-    #             if long_clause.sentences[0].negated ^ long_clause.sentences[
-    #                 1].negated:  # this tests to see if both clauses are defined in scope
-    #                 negated_sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[0].negated else \
-    #                     long_clause.sentences[1]
-    #                 sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[1].negated else \
-    #                     long_clause.sentences[1]
-    #                 short_sentence: Sentence = short_clause.sentences[0]
-    #                 if negated_sentence.name == short_sentence.name:
-    #                     if (short_sentence.variables == negated_sentence.variables == sentence.variables) and (
-    #                             short_sentence.literals == negated_sentence.literals == sentence.literals):
-    #                         # here the clauses are of the form: ~p(x, y, z) | q(x, y, z), p(x, y, z)
-    #                         new_sentence: Sentence = Sentence(name=deepcopy(sentence.name),
-    #                                                           identifier=deepcopy(sentence.name),
-    #                                                           variables=deepcopy(sentence.variables),
-    #                                                           literals=deepcopy(sentence.literals))
-    #                         new_clause: Clause = Clause([new_sentence])
-    #                         # self.remove_clause(short_clause.get_kb_id())
-    #                         self.remove_clause(long_clause.get_kb_id())
-    #                         self.append(new_clause)
-    #                         resolved = True
-    #     return resolved if not resolved else self.resolution()  # TODO: may not want recursive feature?
+
+    def resolution(self) -> bool:
+        kb = self.facts
+        for fact in kb:
+            # print()
+            # print("c ", clause)
+            # print()
+            if len(fact) != 1:
+                # print("in")
+                conclusion = fact
+                for clause in kb:
+                    # print("s ",sentence)
+                    # x
+                    copy_clause = deepcopy(clause)
+                    copy_clause.negate()
+                    for stm in conclusion.sentences:
+                        # print("clause2 ", clause)
+                        # print("stm", stm)
+                        # print("before negate", clause)
+                        # print("after negate", str(clause))
+                        if copy_clause.negated and copy_clause.sentences[0].negated:
+                            copy_clause.sentences[0].negate()
+                            copy_clause.negate()
+                            # print("after negate2", str(clause))
+                        #print("comparison", stm, "==", copy_clause)
+                        if str(stm) == str(copy_clause):
+                            # print("comparison", stm, "==", clause)
+                            conclusion.sentences.remove(stm)
+                            # conclusion.negate()
+                            conclusion.string = ""
+                            self.string = ""
+                            #print("conc ", conclusion)
+
+
+        # last_clause: Clause = self.kb[-1]
+        # resolved: bool = False
+        # for clause in self.kb:
+        #     if last_clause == clause:
+        #         break
+        #     if (len(last_clause) == 1 and len(clause) == 2) or len(last_clause) == 2 and len(clause) == 1:
+        #         long_clause: Clause = clause if len(clause) == 2 else last_clause
+        #         short_clause: Clause = clause if len(clause) == 1 else last_clause
+        #         if long_clause.sentences[0].negated ^ long_clause.sentences[
+        #             1].negated:  # this tests to see if both clauses are defined in scope
+        #             negated_sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[0].negated else \
+        #                 long_clause.sentences[1]
+        #             sentence: Sentence = long_clause.sentences[0] if long_clause.sentences[1].negated else \
+        #                 long_clause.sentences[1]
+        #             short_sentence: Sentence = short_clause.sentences[0]
+        #             if negated_sentence.name == short_sentence.name:
+        #                 if (short_sentence.variables == negated_sentence.variables == sentence.variables) and (
+        #                         short_sentence.literals == negated_sentence.literals == sentence.literals):
+        #                     # here the clauses are of the form: ~p(x, y, z) | q(x, y, z), p(x, y, z)
+        #                     new_sentence: Sentence = Sentence(name=deepcopy(sentence.name),
+        #                                                       identifier=deepcopy(sentence.name),
+        #                                                       variables=deepcopy(sentence.variables),
+        #                                                       literals=deepcopy(sentence.literals))
+        #                     new_clause: Clause = Clause([new_sentence])
+        #                     # self.remove_clause(short_clause.get_kb_id())
+        #                     self.remove_clause(long_clause.get_kb_id())
+        #                     self.append(new_clause)
+        #                     resolved = True
+        # return resolved if not resolved else self.resolution()  # TODO: may not want recursive feature?
 
     @staticmethod
     def unify(x, y, *, theta: str = "") -> str:
