@@ -39,8 +39,7 @@ class ThreadedExplore:
             for thread in threads:
                 Thread.join(thread)
             self.lock.acquire()
-            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}\n\n")
-            self.lock.release()
+            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}\n")
             print("Board size:                  " + str(size) + "x" + str(size))
             print("Number of runs:             ", self.num_caves)
             print("Number of times gold found: ", self.num_gold)
@@ -49,7 +48,13 @@ class ThreadedExplore:
             print("Deaths from old age:        ", self.num_old / self.num_caves)
             print("Deaths from pit:            ", self.num_pit / self.num_caves)
             print("Deaths from wumpus:         ", self.num_wumpus / self.num_caves)
-            print()
+            print("\n\n")
+            self.num_gold: int = 0
+            self.num_deaths: int = 0
+            self.num_wumpus: int = 0
+            self.num_pit: int = 0
+            self.num_old: int = 0
+            self.lock.release()
 
     def _run_explorer(self, board_size: int, thread_number: int) -> None:
         """

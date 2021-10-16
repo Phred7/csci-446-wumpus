@@ -30,7 +30,8 @@ class Sentence:
     def __str__(self) -> str:
         """
         Creates the string representation of this Sentence.
-        This method is memoized. Ie. Sentence stores a copy of the value returned from this method. If this Sentence is not altered this method will simply return that string rather than generate the same string again.
+        This method is memoized. Ie. Sentence stores a copy of the value returned from this method. If this Sentence is
+        not altered this method will simply return that string rather than generate the same string again.
         :return: str representation of this Sentence.
         """
         if self.string == "" or self.verbose is True:
