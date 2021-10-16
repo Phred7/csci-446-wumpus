@@ -55,3 +55,6 @@ class Clause:
     def remove(self, item: Sentence):
         self.sentences.remove(item)
         self.string = ""
+
+
+
