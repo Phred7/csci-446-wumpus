@@ -16,7 +16,10 @@ class KnowledgeBase:
         if self.string == "":
             string = f"{self.__class__.__name__}:\n"
             for clause in self.kb:
-                string += f"{str(clause)}\n"
+                if len(clause) == 0:
+                    self.remove_clause(clause.kb_id)
+                else:
+                    string += f"{str(clause)}\n"
             self.string = string
         return self.string
 
@@ -111,7 +114,7 @@ class KnowledgeBase:
         pass
 
     def resolution(self) -> None:
-        kb = deepcopy(self.facts)
+        kb = self.facts
         for fact in kb:
             # print()
             # print("c ", clause)
@@ -119,10 +122,13 @@ class KnowledgeBase:
             if len(fact) != 1:
                 # print("in")
                 conclusion = fact
-                for clause in deepcopy(self.facts):
+                for clause in self.facts:
                     # print("s ",sentence)
                     # x
                     copy_clause = deepcopy(clause)
+                    if len(copy_clause) == 0:
+                        self.string = ""
+                        continue
                     copy_clause.negate()
                     for stm in conclusion.sentences:
                         # print("clause2 ", clause)
@@ -137,6 +143,7 @@ class KnowledgeBase:
                         if str(stm) == str(copy_clause):
                             # print("comparison", stm, "==", clause)
                             self.remove_sentence(conclusion, stm)
+        pass
                             # conclusion.negate()
 
                             # print("conc ", conclusion)

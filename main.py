@@ -77,8 +77,7 @@ if __name__ == '__main__':
     board.generate_board()
     board.disp()
     rational: RationalExplorer = RationalExplorer(board)
-    rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
-    print(f"initial KB:\n{rational.knowledge_base}")
+    # print(f"initial KB:\n{rational.knowledge_base}")
     while (not rational.is_dead) and (not rational.has_gold):
         rational.act()
         print(rational)
