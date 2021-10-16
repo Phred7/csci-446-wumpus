@@ -49,6 +49,11 @@ class Clause:
         self.rule = True
 
     def negate(self) -> None:
+        """
+        Negates this Clause.
+        Ie. ~w(x,y) | w(z,y) | w(x,zz).negate() = ~(~w(x,y) | w(z,y) | w(x,zz))
+        :return: None.
+        """
         self.negated = False if self.negated else True
         self.string = ""
 

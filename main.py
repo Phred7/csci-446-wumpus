@@ -14,28 +14,33 @@ class ThreadedExplore:
 
     def __init__(self):
         self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        self.lock = threading.Lock()
         self.num_gold: int = 0
         self.num_deaths: int = 0
         self.num_wumpus: int = 0
         self.num_pit: int = 0
         self.num_old: int = 0
-        self.num_caves: int = 25
+        self.num_caves: int = 10
 
     def explore(self) -> None:
         for size in self.board_sizes:
             threads: List[Thread] = []
+            self.lock.acquire()
+            print(f"Board: {size}")
+            self.lock.release()
             for i in range(0, self.num_caves):
                 threads.append(threading.Thread(target=self._run_explorer, args=(deepcopy(size), i,),
                                                 name=f"rational_explorer_thread{i}"))
             for thread in threads:
                 thread.start()
-                print(f"{thread.name} started")
+            self.lock.acquire()
             print(f"Threads 0-{self.num_caves - 1} started for board size: {size}")
+            self.lock.release()
             for thread in threads:
                 Thread.join(thread)
-                print(f"{thread.name} joined")
-            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}")
-            time.sleep(5)
+            self.lock.acquire()
+            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}\n\n")
+            self.lock.release()
             print("Board size:                  " + str(size) + "x" + str(size))
             print("Number of runs:             ", self.num_caves)
             print("Number of times gold found: ", self.num_gold)
@@ -73,9 +78,10 @@ class ThreadedExplore:
             self.num_old += 1
 
         end_time = datetime.now()
-
-        # print("Finished cave", thread_number, "in", end_time - start_time,
-              # "      " + ("X" if rational_explorer.is_dead else "G"))
+        self.lock.acquire()
+        print("Finished cave", thread_number, "in", end_time - start_time,
+              "      " + ("X" if rational_explorer.is_dead else "G"))
+        self.lock.release()
         return
 
 
