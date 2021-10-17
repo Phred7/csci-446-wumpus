@@ -14,7 +14,7 @@ class MultiProcessExplore:
 
     def __init__(self):
         # self.board_sizes: List[int] = [5, 10, 15, 20, 25]
-        self.board_sizes: List[int] = [10]
+        self.board_sizes: List[int] = []
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.num_gold: int = 0
@@ -79,6 +79,7 @@ class MultiProcessExplore:
         board: Board = Board(board_size)
         board.generate_board()
         rational_explorer: RationalExplorer = RationalExplorer(board)
+
         while not rational_explorer.is_dead and not rational_explorer.has_gold:
             rational_explorer.act()
         self.lock.acquire()
