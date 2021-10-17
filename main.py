@@ -1,7 +1,7 @@
 import threading
+import time
 from threading import Thread
 
-import rational_explorer
 from knowledge_base import *
 from clause import *
 from sentence import *
@@ -9,34 +9,91 @@ from board import *
 from rational_explorer import *
 from datetime import datetime
 
-def explore(explorer: RationalExplorer) -> int:
-    """
-    Used to run this explorer on it's board.
-    :return:
-    """
 
-    return 0
+class ThreadedExplore:
+
+    def __init__(self):
+        self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        self.lock = threading.Lock()
+        self.num_gold: int = 0
+        self.num_deaths: int = 0
+        self.num_wumpus: int = 0
+        self.num_pit: int = 0
+        self.num_old: int = 0
+        self.num_caves: int = 10
+
+    def explore(self) -> None:
+        for size in self.board_sizes:
+            threads: List[Thread] = []
+            self.lock.acquire()
+            print(f"Board: {size}")
+            self.lock.release()
+            for i in range(0, self.num_caves):
+                threads.append(threading.Thread(target=self._run_explorer, args=(deepcopy(size), i,),
+                                                name=f"rational_explorer_thread{i}"))
+            for thread in threads:
+                thread.start()
+            self.lock.acquire()
+            print(f"Threads 0-{self.num_caves - 1} started for board size: {size}")
+            self.lock.release()
+            for thread in threads:
+                Thread.join(thread)
+            self.lock.acquire()
+            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}\n")
+            print("Board size:                  " + str(size) + "x" + str(size))
+            print("Number of runs:             ", self.num_caves)
+            print("Number of times gold found: ", self.num_gold)
+            print("Number of times died:       ", self.num_deaths)
+            print("Success rate:               ", self.num_gold / self.num_caves)
+            print("Deaths from old age:        ", self.num_old / self.num_caves)
+            print("Deaths from pit:            ", self.num_pit / self.num_caves)
+            print("Deaths from wumpus:         ", self.num_wumpus / self.num_caves)
+            print("\n\n")
+            self.num_gold: int = 0
+            self.num_deaths: int = 0
+            self.num_wumpus: int = 0
+            self.num_pit: int = 0
+            self.num_old: int = 0
+            self.lock.release()
+
+    def _run_explorer(self, board_size: int, thread_number: int) -> None:
+        """
+        Used to run this explorer on it's board.
+        :return:
+        """
+        start_time = datetime.now()
+        board: Board = Board(board_size)
+        board.generate_board()
+        rational_explorer: RationalExplorer = RationalExplorer(board)
+        while not rational_explorer.is_dead and not rational_explorer.has_gold:
+            rational_explorer.act()
+        if rational_explorer.is_dead:
+            self.num_deaths += 1
+        if rational_explorer.has_gold:
+            self.num_gold += 1
+
+        x: int = rational_explorer.location[0]
+        y: int = rational_explorer.location[1]
+
+        if rational_explorer.board.grid[x][y][CellContent.WUMPUS]:
+            self.num_wumpus += 1
+        if rational_explorer.board.grid[x][y][CellContent.PIT]:
+            self.num_pit += 1
+        if rational_explorer.max_age <= rational_explorer.actions_taken:
+            self.num_old += 1
+
+        end_time = datetime.now()
+        self.lock.acquire()
+        print("Finished cave", thread_number, "in", end_time - start_time,
+              "      " + ("X" if rational_explorer.is_dead else "G"))
+        self.lock.release()
+        return
 
 
 if __name__ == '__main__':
     # Threading:
-    # board_sizes: List[int] = [5, 10, 15, 20, 25]
-    #
-    # for size in board_sizes:
-    #     threads: List[Thread] = []
-    #     thread_count: int = 25
-    #     for i in range(0, thread_count):
-    #         board: Board = Board(size)
-    #         rational: RationalExplorer = RationalExplorer(deepcopy(board))
-    #         threads.append(threading.Thread(target=explore, args=(deepcopy(rational),),
-    #                                         name=f"rational_explorer_thread{i}"))
-    #     for thread in threads:
-    #         thread.start()
-    #     print(f"Threads 0-{thread_count - 1} started")
-    #     for thread in threads:
-    #         Thread.join(thread)
-    #         #Thread._
-    #     print(f"Threads 0-{thread_count - 1} joined")
+    threaded_explore: ThreadedExplore = ThreadedExplore()
+    threaded_explore.explore()
 
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()
@@ -59,7 +116,7 @@ if __name__ == '__main__':
     # print(knowledge_base)
 
     # Example Resolution:
-    # knowledge_base: KnowledgeBase = KnowledgeBase()
+    # knowledge_base: KnowledgeBase = KnowledgeBase(5)
     #
     # sentence: Sentence = Sentence("p", "p", variables=["x"], negated=True)
     # sentence_2: Sentence = Sentence("q", "q", variables=["x"])
@@ -77,7 +134,6 @@ if __name__ == '__main__':
     # board: Board = Board(size=5)
     # board.generate_board()
     # print(board)
-
 
     # Example Rational:
     # board: Board = Board(size=5)
@@ -99,254 +155,48 @@ if __name__ == '__main__':
     # print("Exiting")
 
     # More rigorous rational testbed:
-    numCaves = 30
+    # numCaves = 30
     # boardSizes = [5, 10, 15, 20, 25]
-    boardSizes = [5, 10, 15, 20, 25]
-    for boardSize in boardSizes:
-        numGold = 0
-        numDeaths = 0
-        numWump = 0
-        numPit = 0
-        numOld = 0
-        for i in range(numCaves):
-            start = datetime.now()
-            b = Board(boardSize)
-            b.generate_board()
-            e = rational_explorer.RationalExplorer(b)
-            while not e.is_dead and not e.has_gold:
-                e.act()
-            if e.is_dead:
-                numDeaths += 1
-            if e.has_gold:
-                numGold += 1
-
-            x = e.location[0]
-            y = e.location[1]
-
-            if e.board.grid[x][y][CellContent.WUMPUS]:
-                numWump += 1
-            if e.board.grid[x][y][CellContent.PIT]:
-                numPit += 1
-            if e.max_age <= e.actions_taken:
-                numOld += 1
-
-            end = datetime.now()
-
-            print("Finished cave", i, "in", end - start, "      " + ("X" if e.is_dead else "G"))
-        print("Board size:                  " + str(boardSize) + "x" + str(boardSize))
-        print("Number of runs:             ", numCaves)
-        print("Number of times gold found: ", numGold)
-        print("Number of times died:       ", numDeaths)
-        print("Success rate:               ", numGold / numCaves)
-        print("Deaths from old age:        ", numOld / numCaves)
-        print("Deaths from pit:            ", numPit / numCaves)
-        print("Deaths from wumpus:         ", numWump / numCaves)
-        print()
-
-
-    # rational.knowledge_base.append(Clause([Sentence('stench', 's', literals=[0, 1], negated=False)]))
-    # rational.knowledge_base.infer()
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.resolution()
-    # print(print("kb after", rational.knowledge_base))
-
-    # print(f"{rational.board.__class__.__name__}:\n{rational.board}")
-    # print(rational.knowledge_base)
-    # rules: List[Clause] = rational.knowledge_base.get_rules()
-    # sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
-    # for rule in rules:
-    #     if rule.sentences[0].name == sentence.name:
-    #         theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
-    #         if theta != "failure":
-    #             #print(f"theta: {theta}")
-    #             sentences: List[Sentence] = []
-    #             for i in range(1, len(rule)):
-    #                 args: List[str] = []
-    #                 for arg in rule.sentences[i].variables:
-    #                     beta: List[str] = theta.split(' ')
-    #                     beta = beta[:-1]
-    #                     #print(f"beta: {beta}")
-    #                     for substring in beta:
-    #                         #print(f"substring: {substring}")
-    #                         substring = substring.strip('{').strip('}')
-    #                         val: str = substring[:substring.index("/")]
-    #                         var: str = substring[substring.index("/")+1:]
-    #                         #print(f"val: {val}\nvar: {var}")
-    #                         if var in arg:
-    #                             new_arg: str = arg.replace(var, val)
-    #                             args.append(new_arg)
-    #                 sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
-    #             rational.knowledge_base.append(Clause(sentences))
-    # print(rational.knowledge_base)
+    # for boardSize in boardSizes:
+    #     num_gold = 0
+    #     num_deaths = 0
+    #     num_wump = 0
+    #     num_pit = 0
+    #     num_old = 0
+    #     for i in range(numCaves):
+    #         start = datetime.now()
+    #         b = Board(boardSize)
+    #         b.generate_board()
+    #         e = rational_explorer.RationalExplorer(b)
+    #         while not e.is_dead and not e.has_gold:
+    #             e.act()
+    #         if e.is_dead:
+    #             num_deaths += 1
+    #         if e.has_gold:
+    #             num_gold += 1
     #
-    # #resolution example 1
-    # #print(rational.knowledge_base)
-    # rules: List[Clause] = rational.knowledge_base.get_rules()
-    # #conclusion = Clause([Sentence('stench', 'w', literals=[2, 2], negated=True)])
-    # #print("before c", conclusion)
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[1, 0], negated=True)]))
-    # print("kb ",rational.knowledge_base)
-    # # conclusion = conclusion.negate()
-    # # print("c", conclusion)
-    # kb: List[Clause] = rational.knowledge_base.get_facts()
-    # #conclusion = kb[1]
-    # #print('conclusion ',conclusion)
-    # for fact in kb:
-    #     # print()
-    #     # print("c ", clause)
-    #     # print()
-    #     if len(fact) != 1:
-    #         #print("in")
-    #         conclusion = fact
-    #         for clause in kb:
-    #             #print("s ",sentence)
-    #             # x
-    #             copy_clause = deepcopy(clause)
-    #             copy_clause.negate()
-    #             for stm in conclusion.sentences:
-    #                 # print("clause2 ", clause)
-    #                 # print("stm", stm)
-    #                 #print("before negate", clause)
-    #                 #print("after negate", str(clause))
-    #                 if copy_clause.negated and copy_clause.sentences[0].negated:
-    #                     copy_clause.sentences[0].negate()
-    #                     copy_clause.negate()
-    #                     #print("after negate2", str(clause))
-    #                 print("comparison", stm, "==", copy_clause)
-    #                 if str(stm) == str(copy_clause):
-    #                     #print("comparison", stm, "==", clause)
-    #                     conclusion.remove(stm)
-    #                     #conclusion.negate()
-    #                     conclusion.string = ""
-    #                     rational.knowledge_base.string = ""
-    #                     print("conc ", conclusion)
+    #         x = e.location[0]
+    #         y = e.location[1]
     #
-    # print("kb after",rational.knowledge_base)
-    #                 # negated_sentence = "~" + str(clause.sentences[0])
-    #                 # print("comparison", stm, "==", negated_sentence)
-    #                 # #print("negated",negated_sentence[:negated_sentence.index("(")-1:])
-    #                 # if negated_sentence[:negated_sentence.index("(")-1:] == "~~":
-    #                 #     #print("in")
-    #                 #     negated_sentence = negated_sentence.replace("~", "")
-    #                 # print("comparison2", stm, "==", negated_sentence)
-    #                 # if str(stm) == str(negated_sentence):
-    #                 #     pass
-    #                         #conclusion.remove(stm)
-    #         #if conclusion contradicts sentence
-
-    # #print(f"{rational.board.__class__.__name__}:\n{rational.board}")
-    # #print(rational.knowledge_base)
-    # rules: List[Clause] = rational.knowledge_base.get_rules()
-    # sentence: Sentence = rational.knowledge_base.kb[-1].sentences[0]
-    # for rule in rules:
-    #     if rule.sentences[0].name == sentence.name:
-    #         theta: str = KnowledgeBase.unify(sentence, rule.sentences[0])
-    #         if theta != "failure":
-    #             #print(f"theta: {theta}")
-    #             sentences: List[Sentence] = []
-    #             for i in range(1, len(rule)):
-    #                 args: List[str] = []
-    #                 for arg in rule.sentences[i].variables:
-    #                     beta: List[str] = theta.split(' ')
-    #                     beta = beta[:-1]
-    #                     #print(f"beta: {beta}")
-    #                     for substring in beta:
-    #                         #print(f"substring: {substring}")
-    #                         substring = substring.strip('{').strip('}')
-    #                         val: str = substring[:substring.index("/")]
-    #                         var: str = substring[substring.index("/")+1:]
-    #                         #print(f"val: {val}\nvar: {var}")
-    #                         if var in arg:
-    #                             new_arg: str = arg.replace(var, val)
-    #                             args.append(new_arg)
-    #                 sentences.append(Sentence(rule.sentences[1].name, rule.sentences[1].identifier, variables=args))
-    #             rational.knowledge_base.append(Clause(sentences))
-    # print(rational.knowledge_base)
+    #         if e.board.grid[x][y][CellContent.WUMPUS]:
+    #             num_wump += 1
+    #         if e.board.grid[x][y][CellContent.PIT]:
+    #             num_pit += 1
+    #         if e.max_age <= e.actions_taken:
+    #             num_old += 1
     #
-    # #resolution example 1
-    # #print(rational.knowledge_base)
-    # rules: List[Clause] = rational.knowledge_base.get_rules()
-    # #conclusion = Clause([Sentence('stench', 'w', literals=[2, 2], negated=True)])
-    # #print("before c", conclusion)
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('wumpus', 'w', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('pit', 'p', literals=[1, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 0], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[0, 1], negated=True)]))
-    # rational.knowledge_base.append(Clause([Sentence('gold', 'g', literals=[1, 0], negated=True)]))
-    # print("kb ",rational.knowledge_base)
-    # # conclusion = conclusion.negate()
-    # # print("c", conclusion)
-    # kb: List[Clause] = rational.knowledge_base.get_facts()
-    # #conclusion = kb[1]
-    # #print('conclusion ',conclusion)
-    # for fact in kb:
-    #     # print()
-    #     # print("c ", clause)
-    #     # print()
-    #     if len(fact) != 1:
-    #         #print("in")
-    #         conclusion = fact
-    #         for clause in kb:
-    #             #print("s ",sentence)
-    #             # x
-    #             copy_clause = deepcopy(clause)
-    #             copy_clause.negate()
-    #             for stm in conclusion.sentences:
-    #                 # print("clause2 ", clause)
-    #                 # print("stm", stm)
-    #                 #print("before negate", clause)
-    #                 #print("after negate", str(clause))
-    #                 if copy_clause.negated and copy_clause.sentences[0].negated:
-    #                     copy_clause.sentences[0].negate()
-    #                     copy_clause.negate()
-    #                     #print("after negate2", str(clause))
-    #                 print("comparison", stm, "==", copy_clause)
-    #                 if str(stm) == str(copy_clause):
-    #                     #print("comparison", stm, "==", clause)
-    #                     conclusion.sentences.remove(stm)
-    #                     #conclusion.negate()
-    #                     conclusion.string = ""
-    #                     rational.knowledge_base.string = ""
-    #                     print("conc ", conclusion)
+    #         end = datetime.now()
     #
-    # print("kb after",rational.knowledge_base)
-
-
-                    # negated_sentence = "~" + str(clause.sentences[0])
-                    # print("comparison", stm, "==", negated_sentence)
-                    # #print("negated",negated_sentence[:negated_sentence.index("(")-1:])
-                    # if negated_sentence[:negated_sentence.index("(")-1:] == "~~":
-                    #     #print("in")
-                    #     negated_sentence = negated_sentence.replace("~", "")
-                    # print("comparison2", stm, "==", negated_sentence)
-                    # if str(stm) == str(negated_sentence):
-                    #     pass
-                            #conclusion.remove(stm)
-            #if conclusion contradicts sentence
-
-
-
-
+    #         print("Finished cave", i, "in", end - start, "      " + ("X" if e.is_dead else "G"))
+    #     print("Board size:                  " + str(boardSize) + "x" + str(boardSize))
+    #     print("Number of runs:             ", numCaves)
+    #     print("Number of times gold found: ", num_gold)
+    #     print("Number of times died:       ", num_deaths)
+    #     print("Success rate:               ", num_gold / numCaves)
+    #     print("Deaths from old age:        ", num_old / numCaves)
+    #     print("Deaths from pit:            ", num_pit / numCaves)
+    #     print("Deaths from wumpus:         ", num_wump / numCaves)
+    #     print()
 
     # Example KB:
     # kb: KnowledgeBase = KnowledgeBase()
@@ -366,4 +216,3 @@ if __name__ == '__main__':
     #
     # query: Sentence = Sentence("test", "t", variables=["10", "256"])
     # print(f"Query: {kb.query(query)}")
-

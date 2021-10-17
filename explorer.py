@@ -5,6 +5,7 @@ from typing import Tuple
 
 from board import *
 
+
 # Abstract class representing an explorer. Has methods and attributes used by both rational and reactive explorer.
 # An explorer is initialized with the board it lives on. It also has quality-of-life output messages for debugging,
 # which are disabled by default.
@@ -307,7 +308,6 @@ class Explorer:
         self.G = (V, E)
         return
 
-
     # TODO description
     def path(self, target: Tuple[int]) -> List[str]:
         V, E = self.G
@@ -348,7 +348,6 @@ class Explorer:
                 path = []
                 step = s
                 while step != (tuple(self.location), self.facing):
-
                     path.append(E[(predecessors[step], step)])
                     step = predecessors[step]
                 path.reverse()
@@ -356,10 +355,10 @@ class Explorer:
             for edge in E.keys():
                 if edge[0] == s \
                         and edge[1] not in predecessors.keys() \
-                        and edge[1] != (tuple(self.location), self.facing)\
+                        and edge[1] != (tuple(self.location), self.facing) \
                         and (edge[1] in safe_cells_with_facings or edge[1][0] == target[0]):
-                            predecessors[edge[1]] = s
-                            queue.append(edge[1])
+                    predecessors[edge[1]] = s
+                    queue.append(edge[1])
         self.disp()
         self.board.disp()
         print(target[0])
