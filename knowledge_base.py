@@ -169,7 +169,7 @@ class KnowledgeBase:
         new_facts: List[Clause] = deepcopy(self.new_facts())
         self.new_clauses_are_new = False
         for fact in new_facts:
-            self.generate_facts_from_senses(fact)
+            self.resolution_from_senses(fact)
             fact.new = False
         self.resolution()
         self.new_clauses_are_new = True
@@ -268,7 +268,7 @@ class KnowledgeBase:
             return True
         return False
 
-    def generate_facts_from_senses(self, fact: Clause) -> None:
+    def resolution_from_senses(self, fact: Clause) -> None:
         """
         Method that implements unification to generate new facts from the newest facts in this KnowledgeBase and from this KnowledgeBase's Rules.
         :param fact: A Clause in this KnowledgeBase that is considered new. Checks to see if fact can be unified with any rule in this KnowledgeBase to generate a new Clause that is a fact.

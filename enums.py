@@ -26,3 +26,17 @@ class VisitState(IntEnum):
     VISITED = 1
     FRONTIER = 2
     IMPASSABLE = 3
+    
+class Output(IntEnum):
+    RAT_DEATHS = 0
+    RAT_GOLD = 1
+    RAT_WUMPUS = 2
+    RAT_PIT = 3
+    RAT_OLD = 4
+    RAT_ACTIONS = 5
+    REA_DEATHS = 6
+    REA_GOLD = 7
+    REA_WUMPUS = 8
+    REA_PIT = 9
+    REA_OLD = 10
+    REA_ACTIONS = 11
