@@ -1,6 +1,6 @@
-import threading
+import multiprocessing
 import time
-from threading import Thread
+from multiprocessing import Process
 
 from knowledge_base import *
 from clause import *
@@ -10,11 +10,11 @@ from rational_explorer import *
 from datetime import datetime
 
 
-class ThreadedExplore:
+class MultiProcessExplore:
 
     def __init__(self):
         self.board_sizes: List[int] = [5, 10, 15, 20, 25]
-        self.lock = threading.Lock()
+        self.lock = multiprocessing.Lock()
         self.num_gold: int = 0
         self.num_deaths: int = 0
         self.num_wumpus: int = 0
@@ -24,22 +24,22 @@ class ThreadedExplore:
 
     def explore(self) -> None:
         for size in self.board_sizes:
-            threads: List[Thread] = []
+            processes: List[Process] = []
             self.lock.acquire()
             print(f"Board: {size}")
             self.lock.release()
             for i in range(0, self.num_caves):
-                threads.append(threading.Thread(target=self._run_explorer, args=(deepcopy(size), i,),
-                                                name=f"rational_explorer_thread{i}"))
-            for thread in threads:
-                thread.start()
+                processes.append(multiprocessing.Process(target=self._run_explorer, args=(deepcopy(size), i,),
+                                                         name=f"rational_explorer_process_{i}"))
+            for process in processes:
+                process.start()
             self.lock.acquire()
-            print(f"Threads 0-{self.num_caves - 1} started for board size: {size}")
+            print(f"Processes 0-{self.num_caves - 1} started for board size: {size}")
             self.lock.release()
-            for thread in threads:
-                Thread.join(thread)
+            for process in processes:
+                process.join()
             self.lock.acquire()
-            print(f"Threads 0-{self.num_caves - 1} joined for board size: {size}\n")
+            print(f"Processes 0-{self.num_caves - 1} joined for board size: {size}\n")
             print("Board size:                  " + str(size) + "x" + str(size))
             print("Number of runs:             ", self.num_caves)
             print("Number of times gold found: ", self.num_gold)
@@ -67,6 +67,7 @@ class ThreadedExplore:
         rational_explorer: RationalExplorer = RationalExplorer(board)
         while not rational_explorer.is_dead and not rational_explorer.has_gold:
             rational_explorer.act()
+        self.lock.acquire()
         if rational_explorer.is_dead:
             self.num_deaths += 1
         if rational_explorer.has_gold:
@@ -83,7 +84,7 @@ class ThreadedExplore:
             self.num_old += 1
 
         end_time = datetime.now()
-        self.lock.acquire()
+
         print("Finished cave", thread_number, "in", end_time - start_time,
               "      " + ("X" if rational_explorer.is_dead else "G"))
         self.lock.release()
@@ -92,8 +93,8 @@ class ThreadedExplore:
 
 if __name__ == '__main__':
     # Threading:
-    threaded_explore: ThreadedExplore = ThreadedExplore()
-    threaded_explore.explore()
+    multi_process_explore: MultiProcessExplore = MultiProcessExplore()
+    multi_process_explore.explore()
 
     # Example Unification:
     # knowledge_base: KnowledgeBase = KnowledgeBase()

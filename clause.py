@@ -5,6 +5,7 @@ from sentence import *
 
 class Clause:
     """
+    Representation of a Clause in a KnowledgeBase
     Negation:       ~
     Or:             |
     """

@@ -3,6 +3,9 @@ from sentence import *
 
 
 class KnowledgeBase:
+    """
+    Representation of a KnowledgeBase
+    """
 
     def __init__(self, n: int) -> None:
         self.kb: List[Clause] = []
@@ -12,7 +15,14 @@ class KnowledgeBase:
         self.new_clauses_are_new: bool = False
         self._n = n
 
-    def __str__(self) -> str:  # TODO anytime a KB is modified self.string MUST be set to ""
+    def __str__(self) -> str:
+        """
+        Creates the string representation of this KnowledgeBase.
+        This method is memoized. Ie. KnowledgeBase stores a copy of the value returned from this method.
+        If this KnowledgeBase is not altered when called this method will simply return that string rather than generate the
+        same string again.
+        :return: str representation of this KnowledgeBase.
+        """
         if self.string == "":
             string = f"{self.__class__.__name__}:\n"
             for clause in self.kb:
@@ -24,6 +34,11 @@ class KnowledgeBase:
         return self.string
 
     def set_rules(self, rules: List[Clause]) -> None:
+        """
+        Sets the rules of this KnowledgeBase.
+        :param rules: List of Clauses.
+        :return: None.
+        """
         if self.kb_init is True:
             raise IOError("Knowledge Base can only be initialized once. Call append() to add more clauses to this KB.")
         for rule in rules:
@@ -35,6 +50,11 @@ class KnowledgeBase:
         self.kb_init = True
 
     def append(self, item: Clause) -> None:
+        """
+        Appends a clause to this KnowledgeBase. This Clause should be a fact rather than a rule.
+        :param item: Clause to add to this KnowledgeBase
+        :return: None.
+        """
         if self.kb_init is False:
             raise IOError("Knowledge Base has not been initialized. Call set_rules() to initialize this KB.")
         item.set_kb_id(self.clauses)
@@ -45,6 +65,12 @@ class KnowledgeBase:
         self.kb.append(item)
 
     def query_in(self, query_sentence: Sentence) -> List[Clause]:
+        """
+        Searches this KnowledgeBase for a Sentence within a Clause. This Sentence must not be the only sentence in
+        this Clause. All Clauses with a instance of this Sentence will be returned as a List of Clauses.
+        :param query_sentence: Sentence to search this KnowledgeBase for.
+        :return: List of Clauses with instances of query sentence.
+        """
         clause_list: List[Clause] = []
         for clause in self.kb:
             if not clause.rule:
@@ -55,6 +81,12 @@ class KnowledgeBase:
         return clause_list
 
     def query_equal(self, query_sentence: Sentence) -> List[Clause]:
+        """
+        Searches this KnowledgeBase for a Sentence. This Sentence must be the only Sentence in a Clause.
+        All Clauses that match this pattern are returned as a List of Clauses.
+        :param query_sentence: Sentence to search this KnowledgeBase for.
+        :return: List of Clauses with an instance of query_sentence and patching the pattern.
+        """
         clause_list: List[Clause] = []
         for clause in self.kb:
             if not clause.rule:
@@ -63,6 +95,11 @@ class KnowledgeBase:
         return clause_list
 
     def remove_clause(self, clause_kb_id: int) -> None:
+        """
+        Removes a Clause from this KnowledgeBase based on the Clause's kb_id. The kb_id of all following Clauses must then be updated.
+        :param clause_kb_id: int representing the Clause to remove from this KnowledgeBase.
+        :return: None.
+        """
         self.kb.remove(self.get_clause(clause_kb_id))
         self.string = ""
         self.clauses -= 1
@@ -71,40 +108,65 @@ class KnowledgeBase:
             self.kb[i].set_kb_id(current_id - 1)
 
     def remove_sentence(self, clause: Clause, sentence: Sentence) -> None:
+        """
+        Removes a Sentence from a Clause in this KnowledgeBase. This Sentence sentence must be in this Clause clause to be removed from clause.
+        :param clause: Clause to remove sentence from.
+        :param sentence: Sentence to remove from clause.
+        :return: None.
+        """
         self.string = ""
         clause.remove(sentence)
         if len(clause) == 0:
             self.remove_clause(clause.kb_id)
 
     def get_clause(self, clause_kb_id: int) -> Clause:
+        """
+        Gets a Clause in this KnowledgeBase based on it's kb_id.
+        :param clause_kb_id: int representation of a Clause in this KnowledgeBase.
+        :return: Clause with the kb_id clause_kb_id.
+        """
         return self.kb[clause_kb_id]
 
     @property
     def rules(self) -> List[Clause]:
+        """
+        A property of KnowledgeBase that maintains a List of the Rules of this KnowledgeBase.
+        :return: List of Clause in this KnowledgeBase that are rules.
+        """
         rules: List[Clause] = []
         for clause in self.kb:
             if clause.rule:
                 rules.append(clause)
         return rules
 
-    @property
     def facts(self) -> List[Clause]:
+        """
+        A List of Clauses in this KnowledgeBase that are not rules.
+        :return: List of Clauses in this KnowledgeBase that are facts.
+        """
         facts: List[Clause] = []
         for clause in self.kb:
             if not clause.rule:
                 facts.append(clause)
         return facts
 
-    @property
     def new_facts(self) -> List[Clause]:
+        """
+        A List of Clauses in this KnowledgeBase that are facts and are considered new facts in the KnowledgeBase.
+        :return: List of Clauses in this KnowledgeBase that are new facts.
+        """
         new_facts: List[Clause] = []
-        for clause in self.facts:
+        for clause in self.kb:
             if clause.new:
                 new_facts.append(clause)
         return new_facts
 
     def infer(self) -> None:
-        new_facts: List[Clause] = deepcopy(self.new_facts)
+        """
+        Implements Unification and Resolution to generate new facts from the current facts and rules in this KnowledgeBase.
+        :return: None.
+        """
+        new_facts: List[Clause] = deepcopy(self.new_facts())
         self.new_clauses_are_new = False
         for fact in new_facts:
             self.generate_facts_from_senses(fact)
@@ -114,7 +176,7 @@ class KnowledgeBase:
         pass
 
     def resolution(self) -> None:
-        kb = self.facts
+        kb = self.facts()
         for fact in kb:
             # print()
             # print("c ", clause)
@@ -122,7 +184,7 @@ class KnowledgeBase:
             if len(fact) != 1:
                 # print("in")
                 conclusion = fact
-                for clause in self.facts:
+                for clause in self.facts():
                     # print("s ",sentence)
                     # x
                     copy_clause = deepcopy(clause)
@@ -144,15 +206,16 @@ class KnowledgeBase:
                             # print("comparison", stm, "==", clause)
                             self.remove_sentence(conclusion, stm)
         pass
-                            # conclusion.negate()
-
-                            # print("conc ", conclusion)
 
     @staticmethod
     def unify(x, y, *, theta: str = "") -> str:
         """
-        Essentially want to replace variables in a Sentence with a literal from another Sentence to create an new Fact.
-        :return:
+        Direct implementation of Unification.
+        Unifies the variables and literals in x and y.
+        :param x: An Expression. An Expression can be a Clause, Sentence, a list of variables, literals or functions, or a variable, literal, or function.
+        :param y: An Expression.
+        :param theta: substitution string thus far. Defaults to the empty string.
+        :return: str substitution string that represents how to equal the variables and literals in x and y.
         """
         if theta == "failure":
             return theta
@@ -176,6 +239,12 @@ class KnowledgeBase:
 
     @staticmethod
     def unify_variable(expression, variable: str, theta: str) -> str:
+        """
+        :param expression: An Expression to unify with the Variable variable.
+        :param variable: A Variable to unify with the Expression expression.
+        :param theta: The current substring calculated through Unification.
+        :return: The value of theta, the unification substitution string, updated in this method.
+        """
         # if f"{variable}/" in theta:
         #     if type(variable) == int:
         #         variable = str(variable)
@@ -187,10 +256,8 @@ class KnowledgeBase:
             value: str = beta[:beta.index("}")]
             return KnowledgeBase.unify(variable, value, theta=theta)
         elif KnowledgeBase.occur_check(variable, expression):
-            # print("fail")
             return "failure"
         else:
-            # print("here")
             expression = expression[:expression.index("+")] if "+" in expression else expression
             expression = expression[:expression.index("-")] if "-" in expression else expression
             expression = expression.strip('')
@@ -198,31 +265,38 @@ class KnowledgeBase:
 
     @staticmethod
     def occur_check(variable, expression) -> bool:
+        """
+        Checks to see if this variable is in this expression.
+        :param variable: Variable to check is in an Expression.
+        :param expression: An Expression to check if a Variable is in.
+        :return: True if variable is in expression. Otherwise False.
+        """
         if str(variable) in str(expression):
             return True
         return False
 
     def generate_facts_from_senses(self, fact: Clause) -> None:
+        """
+        Method that implements unification to generate new facts from the newest facts in this KnowledgeBase and from this KnowledgeBase's Rules.
+        :param fact: A Clause in this KnowledgeBase that is considered new. Checks to see if fact can be unified with any rule in this KnowledgeBase to generate a new Clause that is a fact.
+        :return: None.
+        """
         rules: List[Clause] = self.rules
         fact_sentence: Sentence = fact.sentences[0]
         for rule in rules:
             if rule.sentences[0].name == fact_sentence.name:
                 theta: str = KnowledgeBase.unify(fact_sentence, rule.sentences[0])
                 if theta != "failure":
-                    # print(f"theta: {theta}")
                     sentences: List[Sentence] = []
                     for i in range(1, len(rule)):
                         args: List[str] = []
                         for arg in rule.sentences[i].variables:
                             beta: List[str] = theta.split(' ')
                             beta = beta[:-1]
-                            # print(f"beta: {beta}")
                             for substring in beta:
-                                # print(f"substring: {substring}")
                                 substring = substring.strip('{').strip('}')
                                 val: str = substring[:substring.index("/")]
                                 var: str = substring[substring.index("/") + 1:]
-                                # print(f"val: {val}\nvar: {var}")
                                 if var in arg:
                                     new_arg: str = arg.replace(var, val)
                                     args.append(new_arg)
@@ -248,7 +322,5 @@ class KnowledgeBase:
                         for sentence in sentences:
                             sentence.negate()
                             self.append(Clause([sentence]))
-                        # == first sentence in rule is negated:
-                        # add each sentence as a negated clause
                     else:
                         self.append(Clause(sentences))
