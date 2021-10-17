@@ -100,6 +100,7 @@ if __name__ == '__main__':
 
     # More rigorous rational testbed:
     numCaves = 30
+    # boardSizes = [5, 10, 15, 20, 25]
     boardSizes = [5, 10, 15, 20, 25]
     for boardSize in boardSizes:
         numGold = 0
