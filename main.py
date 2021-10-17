@@ -56,7 +56,7 @@ class MultiProcessExplore:
             print()
             print("Reactive: Number of times gold found: ", self.output[Output.REA_GOLD])
             print("Reactive: Number of times died:       ", self.output[Output.REA_DEATHS])
-            print("Reactive: Success REAe:               ", self.output[Output.REA_GOLD] / self.num_caves)
+            print("Reactive: Success rate:               ", self.output[Output.REA_GOLD] / self.num_caves)
             print("Reactive: Deaths from old age:        ", self.output[Output.REA_OLD] / self.num_caves)
             print("Reactive: Deaths from pit:            ", self.output[Output.REA_PIT] / self.num_caves)
             print("Reactive: Deaths from wumpus:         ", self.output[Output.REA_WUMPUS] / self.num_caves)

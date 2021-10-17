@@ -10,12 +10,11 @@ class Board:
 
     def __init__(self, size: int = 5, ) -> None:
         self.grid = np.zeros([size, size, len(CellContent)],
-                             dtype=bool)  # TODO: WALKER I USED num_dimensions BUT THE TYPE WAS WRONG
+                             dtype=bool)
         self.size = size
         self.wumpus_count: int = 0
         pass
 
-    # TODO: guarantee safe path
     def generate_board(self, wumpus_probability: float = 0.05, pit_probability: float = 0.05, obstacle_probability: float = 0.05) -> None:
         gold_x: int = 0
         gold_y: int = 0

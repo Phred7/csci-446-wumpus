@@ -9,7 +9,7 @@ class RationalExplorer(Explorer):
 
     def __init__(self, board: Board):
         super().__init__(board)
-        self.max_age = 500
+        self.max_age = 100
         self.frontier: List[List[int]] = []
         self.knowledge_base: KnowledgeBase = KnowledgeBase(board.size)
         self.init_knowledge_base()
@@ -25,7 +25,6 @@ class RationalExplorer(Explorer):
     # - - adds new locations to frontier
     # - assigns a danger rating to each cell on the frontier. Cells with definite dangers are infinitely dangerous,
     #   cells with no dangers have zero danger, and cells with known gold have negative infinite danger.
-    #   TODO: DESCRIBE DANGER RATING PROCESS (MIGHT CHANGE)
     # - chooses a target cell, which is the cell with lowest danger
     # - finds a path to that cell
     # - executes that path
@@ -268,7 +267,6 @@ class RationalExplorer(Explorer):
         (no scream north implies no wumpus north)
         sc(x, y, 0) | ~w(x, y+1)
         """
-        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
         rule11: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "0"], negated=False),
                                  Sentence("wumpus", "w", variables=["x", "y+1"], negated=True)])
 
@@ -279,7 +277,6 @@ class RationalExplorer(Explorer):
         (no scream east implies no wumpus east)
         sc(x, y, 1) | ~w(x+1, y)
         """
-        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
         rule12: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "1"], negated=False),
                                  Sentence("wumpus", "w", variables=["x+1", "y"], negated=True)])
 
@@ -290,7 +287,6 @@ class RationalExplorer(Explorer):
         (no scream south implies no wumpus south)
         sc(x, y, 2) | ~w(x, y-1)
         """
-        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
         rule13: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "2"], negated=False),
                                  Sentence("wumpus", "w", variables=["x", "y-1"], negated=True)])
 
@@ -301,7 +297,6 @@ class RationalExplorer(Explorer):
         (no scream east implies no wumpus east)
         sc(x, y, 3) | ~w(x-1, y)
         """
-        # TODO: DOES THIS WORK? LITERALS/VARIABLES MIXING??
         rule14: Clause = Clause([Sentence("scream", "sc", variables=["x", "y", "3"], negated=False),
                                  Sentence("wumpus", "w", variables=["x-1", "y"], negated=True)])
 
