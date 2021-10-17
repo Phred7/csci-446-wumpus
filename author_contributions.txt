@@ -1,0 +1,13 @@
+Authors of this project are Noah Cunningham, Michael Heidal, Walker Ward.
+
+board.py                                                                : Michael Heidal, Walker Ward
+clause.py                                                               : Walker Ward
+enums.py                                                                : Michael Heidal
+explorer.py                                                             : Michael Heidal
+knowledge_base.py                                                       : Walker Ward, Noah Cunningham
+main.py                                                                 : Walker Ward, Michael Heidal
+rational_explorer.py                                                    : Michael Heidal, Noah Cunningham, Walker Ward
+reactive_explorer.py                                                    : Michael Heidal
+README.md                                                               : Michael Heidal
+sentence.py                                                             : Walker Ward
+ui.py                                                                   : Michael Heidal

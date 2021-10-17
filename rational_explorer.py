@@ -9,7 +9,7 @@ class RationalExplorer(Explorer):
 
     def __init__(self, board: Board):
         super().__init__(board)
-        self.max_age = 500
+        self.max_age = 75
         self.frontier: List[List[int]] = []
         self.knowledge_base: KnowledgeBase = KnowledgeBase(board.size)
         self.init_knowledge_base()
