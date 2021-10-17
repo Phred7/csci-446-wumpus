@@ -1,6 +1,6 @@
 import multiprocessing
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 from knowledge_base import *
 from clause import *
@@ -13,8 +13,10 @@ from datetime import datetime
 class MultiProcessExplore:
 
     def __init__(self):
-        self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        # self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        self.board_sizes: List[int] = [10]
         self.lock = multiprocessing.Lock()
+        self.queue: Queue = Queue()
         self.num_gold: int = 0
         self.num_deaths: int = 0
         self.num_wumpus: int = 0
@@ -37,6 +39,18 @@ class MultiProcessExplore:
             print(f"Processes 0-{self.num_caves - 1} started for board size: {size}")
             self.lock.release()
             for process in processes:
+                pop = self.queue.get()
+                if len(pop) == 5:
+                    if pop[0] == 1:
+                        self.num_deaths += 1
+                    if pop[1] == 1:
+                        self.num_gold += 1
+                    if pop[2] == 1:
+                        self.num_wumpus += 1
+                    if pop[3] == 1:
+                        self.num_pit += 1
+                    if pop[4] == 1:
+                        self.num_old += 1
                 process.join()
             self.lock.acquire()
             print(f"Processes 0-{self.num_caves - 1} joined for board size: {size}\n")
@@ -56,9 +70,9 @@ class MultiProcessExplore:
             self.num_old: int = 0
             self.lock.release()
 
-    def _run_explorer(self, board_size: int, thread_number: int) -> None:
+    def _run_explorer(self, board_size: int, process_number: int) -> None:
         """
-        Used to run this explorer on it's board.
+        Used to create and run a rationalExplorer on a Board of size board_size.
         :return:
         """
         start_time = datetime.now()
@@ -68,24 +82,19 @@ class MultiProcessExplore:
         while not rational_explorer.is_dead and not rational_explorer.has_gold:
             rational_explorer.act()
         self.lock.acquire()
-        if rational_explorer.is_dead:
-            self.num_deaths += 1
-        if rational_explorer.has_gold:
-            self.num_gold += 1
 
         x: int = rational_explorer.location[0]
         y: int = rational_explorer.location[1]
 
-        if rational_explorer.board.grid[x][y][CellContent.WUMPUS]:
-            self.num_wumpus += 1
-        if rational_explorer.board.grid[x][y][CellContent.PIT]:
-            self.num_pit += 1
-        if rational_explorer.max_age <= rational_explorer.actions_taken:
-            self.num_old += 1
-
+        self.queue.put([
+            1 if rational_explorer.is_dead else 0,
+            1 if rational_explorer.has_gold else 0,
+            1 if rational_explorer.board.grid[x][y][CellContent.WUMPUS] else 0,
+            1 if rational_explorer.board.grid[x][y][CellContent.PIT] else 0,
+            1 if rational_explorer.max_age <= rational_explorer.actions_taken else 0])
         end_time = datetime.now()
 
-        print("Finished cave", thread_number, "in", end_time - start_time,
+        print("Finished cave", process_number, "in", end_time - start_time,
               "      " + ("X" if rational_explorer.is_dead else "G"))
         self.lock.release()
         return
