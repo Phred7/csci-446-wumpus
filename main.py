@@ -11,8 +11,8 @@ from datetime import datetime
 class MultiProcessExplore:
 
     def __init__(self):
-        self.board_sizes: List[int] = [5, 10, 15, 20, 25]
-        # self.board_sizes: List[int] = [5]
+        # self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        self.board_sizes: List[int] = [10]
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
 
@@ -92,7 +92,7 @@ class MultiProcessExplore:
             1 if rational_explorer.board.grid[x][y][CellContent.PIT] else 0,
             1 if rational_explorer.max_age <= rational_explorer.actions_taken else 0,
             rational_explorer.actions_taken,
-            
+
             1 if reactive_explorer.is_dead else 0,
             1 if reactive_explorer.has_gold else 0,
             1 if reactive_explorer.board.grid[x][y][CellContent.WUMPUS] else 0,
