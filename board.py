@@ -1,5 +1,6 @@
 from random import randint
 from random import random
+from random import seed
 from typing import List
 
 import numpy as np
@@ -17,6 +18,7 @@ class Board:
 
     def generate_board(self, wumpus_probability: float = 0.05, pit_probability: float = 0.05,
                        obstacle_probability: float = 0.05) -> None:
+        seed(12)
         gold_x: int = 0
         gold_y: int = 0
 

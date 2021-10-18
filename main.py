@@ -113,9 +113,40 @@ class MultiProcessExplore:
 
 
 if __name__ == '__main__':
-    # Threading:
-    multi_process_explore: MultiProcessExplore = MultiProcessExplore()
-    multi_process_explore.explore()
+    # Parallelism:
+    # multi_process_explore: MultiProcessExplore = MultiProcessExplore()
+    # multi_process_explore.explore()
+    num_gold = 0
+    num_deaths = 0
+    num_wump = 0
+    num_pit = 0
+    num_old = 0
+    start = datetime.now()
+    b = Board(5)
+    b.generate_board()
+    e = RationalExplorer(b)
+    print(b)
+    while not e.is_dead and not e.has_gold:
+        print(e)
+        e.act()
+    if e.is_dead:
+        num_deaths += 1
+    if e.has_gold:
+        num_gold += 1
+
+    x = e.location[0]
+    y = e.location[1]
+
+    if e.board.grid[x][y][CellContent.WUMPUS]:
+        num_wump += 1
+    if e.board.grid[x][y][CellContent.PIT]:
+        num_pit += 1
+    if e.max_age <= e.actions_taken:
+        num_old += 1
+
+    end = datetime.now()
+    print(e)
+
 
     # More rigorous rational testbed:
     # numCaves = 30

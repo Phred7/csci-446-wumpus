@@ -170,7 +170,7 @@ class KnowledgeBase:
         self.new_clauses_are_new = False
         for fact in new_facts:
             self.resolution_from_senses(fact)
-            fact.new = False
+            self.get_clause(fact.get_kb_id()).new = False
         self.resolution()
         self.new_clauses_are_new = True
         pass
