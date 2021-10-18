@@ -182,10 +182,10 @@ class KnowledgeBase:
         a sentence in the non-singular clause it removes the sentence from the non-singular clause
         :return:
         """
-        kb = self.facts()
-        for fact in kb:
+        duplicate_clauses: List[int] = []
+        for fact in self.facts():
             if len(fact) != 1:
-                conclusion = fact
+                conclusion = deepcopy(fact)
                 for clause in self.facts():
                     copy_clause = deepcopy(clause)
                     if len(copy_clause) == 0:
@@ -198,7 +198,15 @@ class KnowledgeBase:
                             copy_clause.negate()
                         if str(stm) == str(copy_clause):
                             self.remove_sentence(conclusion, stm)
-        pass
+            else:
+                for clause in self.facts():
+                    if str(fact) == str(clause) and (fact.get_kb_id() != clause.get_kb_id()) and not (fact.kb_id in duplicate_clauses or clause.kb_id in duplicate_clauses):
+                        duplicate_clauses.append(clause.kb_id) if (fact.get_kb_id() < clause.get_kb_id()) else duplicate_clauses.append(fact.kb_id)
+                        continue
+        duplicate_clauses.sort(reverse=True)
+        for clause_id in duplicate_clauses:
+            self.remove_clause(clause_id)
+
 
     @staticmethod
     def unify(x, y, *, theta: str = "") -> str:

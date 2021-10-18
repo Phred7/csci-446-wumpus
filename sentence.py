@@ -34,7 +34,7 @@ class Sentence:
         not altered this method will simply return that string rather than generate the same string again.
         :return: str representation of this Sentence.
         """
-        if self.string == "" or self.verbose is True:
+        if self.string == "":
             string: str = f"{'~' if self.negated else ''}{self.name if self.verbose else self.identifier}("
             arguments = self.variables if self.vars else self.literals
             for i in range(len(arguments)):
