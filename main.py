@@ -1,5 +1,4 @@
 import multiprocessing
-import time
 from multiprocessing import Process, Queue
 
 
@@ -15,9 +14,7 @@ class MultiProcessExplore:
         self.board_sizes: List[int] = [10]
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
-
         self.output = list(np.full(len(Output), 0))
-
         self.num_caves: int = 10
 
     def explore(self) -> None:
