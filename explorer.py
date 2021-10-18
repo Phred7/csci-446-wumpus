@@ -308,7 +308,6 @@ class Explorer:
         self.G = (V, E)
         return
 
-    # TODO description
     def path(self, target: Tuple[int]) -> List[str]:
         V, E = self.G
 

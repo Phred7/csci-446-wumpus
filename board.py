@@ -7,7 +7,6 @@ import numpy as np
 from copy import deepcopy
 from enums import *
 
-
 class Board:
 
     def __init__(self, size: int = 5, ) -> None:
@@ -16,9 +15,7 @@ class Board:
         self.size: int = size
         self.wumpus_count: int = 0
 
-    def generate_board(self, wumpus_probability: float = 0.05, pit_probability: float = 0.05,
-                       obstacle_probability: float = 0.05) -> None:
-        # seed(12)
+    def generate_board(self, wumpus_probability: float = 0.05, pit_probability: float = 0.05, obstacle_probability: float = 0.05) -> None:
         gold_x: int = 0
         gold_y: int = 0
 
