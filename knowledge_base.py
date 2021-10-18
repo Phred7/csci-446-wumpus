@@ -169,41 +169,34 @@ class KnowledgeBase:
         new_facts: List[Clause] = deepcopy(self.new_facts())
         self.new_clauses_are_new = False
         for fact in new_facts:
-            self.generate_facts_from_senses(fact)
-            fact.new = False
+            self.resolution_from_senses(fact)
+            self.get_clause(fact.get_kb_id()).new = False
         self.resolution()
         self.new_clauses_are_new = True
         pass
 
     def resolution(self) -> None:
+        """
+        Resolves contradictions in the Knowledge Base. Loops through every non-singular clause and compares each
+        sentence of said clause to a negated version of every other clause. If the negated clause is the same as
+        a sentence in the non-singular clause it removes the sentence from the non-singular clause
+        :return:
+        """
         kb = self.facts()
         for fact in kb:
-            # print()
-            # print("c ", clause)
-            # print()
             if len(fact) != 1:
-                # print("in")
                 conclusion = fact
                 for clause in self.facts():
-                    # print("s ",sentence)
-                    # x
                     copy_clause = deepcopy(clause)
                     if len(copy_clause) == 0:
                         self.string = ""
                         continue
                     copy_clause.negate()
                     for stm in conclusion.sentences:
-                        # print("clause2 ", clause)
-                        # print("stm", stm)
-                        # print("before negate", clause)
-                        # print("after negate", str(clause))
                         if copy_clause.negated and copy_clause.sentences[0].negated:
                             copy_clause.sentences[0].negate()
                             copy_clause.negate()
-                            # print("after negate2", str(clause))
-                        # print("comparison", stm, "==", copy_clause)
                         if str(stm) == str(copy_clause):
-                            # print("comparison", stm, "==", clause)
                             self.remove_sentence(conclusion, stm)
         pass
 
@@ -275,7 +268,7 @@ class KnowledgeBase:
             return True
         return False
 
-    def generate_facts_from_senses(self, fact: Clause) -> None:
+    def resolution_from_senses(self, fact: Clause) -> None:
         """
         Method that implements unification to generate new facts from the newest facts in this KnowledgeBase and from this KnowledgeBase's Rules.
         :param fact: A Clause in this KnowledgeBase that is considered new. Checks to see if fact can be unified with any rule in this KnowledgeBase to generate a new Clause that is a fact.

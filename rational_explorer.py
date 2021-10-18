@@ -149,7 +149,7 @@ class RationalExplorer(Explorer):
         '''
         Rule 1
         (Smell implies wumpus is in adjacent cell) converted to clause form is
-        ~s(x,y) | [w(x+1, y) | w(x-1, y) | w(x, y+1) | w(x, y-1)
+        ~s(x,y) | w(x+1, y) | w(x-1, y) | w(x, y+1) | w(x, y-1)
         '''
         rule1: Clause = Clause([Sentence("stench", "s", variables=["x", "y"], negated=True),
                                 Sentence("wumpus", "w", variables=["x+1", 'y']),

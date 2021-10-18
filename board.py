@@ -1,5 +1,6 @@
 from random import randint
 from random import random
+from random import seed
 from typing import List
 
 import numpy as np
@@ -11,9 +12,8 @@ class Board:
     def __init__(self, size: int = 5, ) -> None:
         self.grid = np.zeros([size, size, len(CellContent)],
                              dtype=bool)
-        self.size = size
+        self.size: int = size
         self.wumpus_count: int = 0
-        pass
 
     def generate_board(self, wumpus_probability: float = 0.05, pit_probability: float = 0.05, obstacle_probability: float = 0.05) -> None:
         gold_x: int = 0
@@ -126,8 +126,8 @@ class Board:
                 for target in targets:
 
                     if (not grid[target[0]][target[1]][CellContent.WUMPUS]) \
-                        and (not grid[target[0]][target[1]][CellContent.PIT]) \
-                        and (not grid[target[0]][target[1]][CellContent.OBSTACLE]):
+                            and (not grid[target[0]][target[1]][CellContent.PIT]) \
+                            and (not grid[target[0]][target[1]][CellContent.OBSTACLE]):
                         edges[(i, j)].append(target)
 
         return dfs((0, 0), gold_coords, marked, edges)
