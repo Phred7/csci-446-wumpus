@@ -40,3 +40,5 @@ class Output(IntEnum):
     REA_PIT = 9
     REA_OLD = 10
     REA_ACTIONS = 11
+    RAT_CELLS_EXPLORED = 12
+    REA_CELLS_EXPLORED = 13

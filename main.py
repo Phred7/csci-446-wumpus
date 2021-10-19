@@ -10,12 +10,12 @@ from datetime import datetime
 class MultiProcessExplore:
 
     def __init__(self):
-        # self.board_sizes: List[int] = [5, 10, 15, 20, 25]
-        self.board_sizes: List[int] = [10]
+        self.board_sizes: List[int] = [5, 10, 15, 20, 25]
+        # self.board_sizes: List[int] = [5, 10]
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.output = list(np.full(len(Output), 0))
-        self.num_caves: int = 10
+        self.num_caves: int = 20
 
     def explore(self) -> None:
         for size in self.board_sizes:
@@ -50,6 +50,7 @@ class MultiProcessExplore:
             print("Rational: Deaths from pit:            ", self.output[Output.RAT_PIT] / self.num_caves)
             print("Rational: Deaths from wumpus:         ", self.output[Output.RAT_WUMPUS] / self.num_caves)
             print("Rational: Average actions taken:      ", self.output[Output.RAT_ACTIONS] / self.num_caves)
+            print("Rational: Average cells explored:     ", self.output[Output.RAT_CELLS_EXPLORED] / self.num_caves)
             print()
             print("Reactive: Number of times gold found: ", self.output[Output.REA_GOLD])
             print("Reactive: Number of times died:       ", self.output[Output.REA_DEATHS])
@@ -58,6 +59,7 @@ class MultiProcessExplore:
             print("Reactive: Deaths from pit:            ", self.output[Output.REA_PIT] / self.num_caves)
             print("Reactive: Deaths from wumpus:         ", self.output[Output.REA_WUMPUS] / self.num_caves)
             print("Reactive: Average actions taken:      ", self.output[Output.REA_ACTIONS] / self.num_caves)
+            print("Reactive: Average cells explored:     ", self.output[Output.REA_CELLS_EXPLORED] / self.num_caves)
 
             print("\n\n")
             self.output = list(np.full(len(Output), 0))
@@ -79,24 +81,28 @@ class MultiProcessExplore:
             reactive_explorer.act()
         self.lock.acquire()
 
-        x: int = rational_explorer.location[0]
-        y: int = rational_explorer.location[1]
+        x_rat: int = rational_explorer.location[0]
+        y_rat: int = rational_explorer.location[1]
+
+        x_rea: int = reactive_explorer.location[0]
+        y_rea: int = reactive_explorer.location[1]
 
         self.queue.put([
             1 if rational_explorer.is_dead else 0,
             1 if rational_explorer.has_gold else 0,
-            1 if rational_explorer.board.grid[x][y][CellContent.WUMPUS] else 0,
-            1 if rational_explorer.board.grid[x][y][CellContent.PIT] else 0,
+            1 if rational_explorer.board.grid[x_rat][y_rat][CellContent.WUMPUS] else 0,
+            1 if rational_explorer.board.grid[x_rat][y_rat][CellContent.PIT] else 0,
             1 if rational_explorer.max_age <= rational_explorer.actions_taken else 0,
             rational_explorer.actions_taken,
 
             1 if reactive_explorer.is_dead else 0,
             1 if reactive_explorer.has_gold else 0,
-            1 if reactive_explorer.board.grid[x][y][CellContent.WUMPUS] else 0,
-            1 if reactive_explorer.board.grid[x][y][CellContent.PIT] else 0,
+            1 if reactive_explorer.board.grid[x_rea][y_rea][CellContent.WUMPUS] else 0,
+            1 if reactive_explorer.board.grid[x_rea][y_rea][CellContent.PIT] else 0,
             1 if reactive_explorer.max_age <= reactive_explorer.actions_taken else 0,
-            reactive_explorer.actions_taken
-
+            reactive_explorer.actions_taken,
+            len(rational_explorer.safe_cells),
+            len(reactive_explorer.safe_cells)
             ])
         end_time = datetime.now()
 
@@ -104,89 +110,49 @@ class MultiProcessExplore:
               "      " + ("X" if rational_explorer.is_dead else "G"),
               "/", ("X" if reactive_explorer.is_dead else "G"),
               "      " + str(rational_explorer.actions_taken),
-              "/", str(reactive_explorer.actions_taken))
+              "/", str(reactive_explorer.actions_taken),
+              "      " + str(len(rational_explorer.safe_cells)),
+              "/", str(len(reactive_explorer.safe_cells))
+              )
         self.lock.release()
         return
 
 
 if __name__ == '__main__':
     # Parallelism:
-    # multi_process_explore: MultiProcessExplore = MultiProcessExplore()
-    # multi_process_explore.explore()
-    num_gold = 0
-    num_deaths = 0
-    num_wump = 0
-    num_pit = 0
-    num_old = 0
-    start = datetime.now()
-    b = Board(5)
-    b.generate_board()
-    e = RationalExplorer(b)
-    print(b)
-    while not e.is_dead and not e.has_gold:
-        print(e)
-        e.act()
-    if e.is_dead:
-        num_deaths += 1
-    if e.has_gold:
-        num_gold += 1
-
-    x = e.location[0]
-    y = e.location[1]
-
-    if e.board.grid[x][y][CellContent.WUMPUS]:
-        num_wump += 1
-    if e.board.grid[x][y][CellContent.PIT]:
-        num_pit += 1
-    if e.max_age <= e.actions_taken:
-        num_old += 1
-
-    end = datetime.now()
-    print(e)
-
-
-    # More rigorous rational testbed:
-    # numCaves = 30
-    # boardSizes = [5, 10, 15, 20, 25]
-    # for boardSize in boardSizes:
-    #     num_gold = 0
-    #     num_deaths = 0
-    #     num_wump = 0
-    #     num_pit = 0
-    #     num_old = 0
-    #     for i in range(numCaves):
-    #         start = datetime.now()
-    #         b = Board(boardSize)
-    #         b.generate_board()
-    #         e = rational_explorer.RationalExplorer(b)
-    #         while not e.is_dead and not e.has_gold:
-    #             e.act()
-    #         if e.is_dead:
-    #             num_deaths += 1
-    #         if e.has_gold:
-    #             num_gold += 1
+    multi_process_explore: MultiProcessExplore = MultiProcessExplore()
+    multi_process_explore.explore()
+    # num_gold = 0
+    # num_deaths = 0
+    # num_wump = 0
+    # num_pit = 0
+    # num_old = 0
+    # start = datetime.now()
+    # b = Board(5)
+    # b.generate_board()
+    # e = RationalExplorer(b)
+    # print(b)
+    # while not e.is_dead and not e.has_gold:
+    #     print(e)
+    #     e.act()
+    # if e.is_dead:
+    #     num_deaths += 1
+    # if e.has_gold:
+    #     num_gold += 1
     #
-    #         x = e.location[0]
-    #         y = e.location[1]
+    # x = e.location[0]
+    # y = e.location[1]
     #
-    #         if e.board.grid[x][y][CellContent.WUMPUS]:
-    #             num_wump += 1
-    #         if e.board.grid[x][y][CellContent.PIT]:
-    #             num_pit += 1
-    #         if e.max_age <= e.actions_taken:
-    #             num_old += 1
+    # if e.board.grid[x][y][CellContent.WUMPUS]:
+    #     num_wump += 1
+    # if e.board.grid[x][y][CellContent.PIT]:
+    #     num_pit += 1
+    # if e.max_age <= e.actions_taken:
+    #     num_old += 1
     #
-    #         end = datetime.now()
-    #
-    #         print("Finished cave", i, "in", end - start, "      " + ("X" if e.is_dead else "G"))
-    #     print("Board size:                  " + str(boardSize) + "x" + str(boardSize))
-    #     print("Number of runs:             ", numCaves)
-    #     print("Number of times gold found: ", num_gold)
-    #     print("Number of times died:       ", num_deaths)
-    #     print("Success rate:               ", num_gold / numCaves)
-    #     print("Deaths from old age:        ", num_old / numCaves)
-    #     print("Deaths from pit:            ", num_pit / numCaves)
-    #     print("Deaths from wumpus:         ", num_wump / numCaves)
-    #     print()
+    # end = datetime.now()
+    # print(e)
+
+
 
 
